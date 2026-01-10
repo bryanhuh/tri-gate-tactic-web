@@ -1,13 +1,18 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useGame } from "@/hooks/useGame";
 import { Card } from "@/components/Card";
 import { GameStatus } from "@/components/GameStatus";
 import confetti from "canvas-confetti";
 import { motion, useAnimation } from "framer-motion";
+import Showcase from "@/components/sections/Showcase";
+import { Spinner } from "@/components/ui/Spinner";
 
 export default function Home() {
+  const [uiState, setUiState] = useState<"showcase" | "loading" | "arena">(
+    "showcase"
+  );
   const { state, startGame, playRound, nextRound, resetGame } = useGame();
   const {
     gameStatus,
@@ -24,6 +29,14 @@ export default function Home() {
   const controls = useAnimation(); // For the shake effect
   const flashControls = useAnimation(); // For the flash effect
   const hasFlashed = useRef(false);
+
+  const handlePlayNow = () => {
+    setUiState("loading");
+    setTimeout(() => {
+      startGame();
+      setUiState("arena");
+    }, 1500); // 1.5 second spinner
+  };
 
   // Trigger Flash and Shake when a round result is declared
   useEffect(() => {
@@ -54,6 +67,14 @@ export default function Home() {
     }
   }, [gameWinner]);
 
+  if (uiState === "showcase") {
+    return <Showcase onPlayNow={handlePlayNow} />;
+  }
+
+  if (uiState === "loading") {
+    return <Spinner />;
+  }
+
   return (
     <motion.main
       animate={controls}
@@ -72,7 +93,7 @@ export default function Home() {
         <div className="flex flex-col -space-y-60">
           {" "}
           {/* Overlap to save space */}
-          {playerDeck.map((card, index) => (
+          {playerDeck.map((card) => (
             <motion.div
               key={card.id}
               layoutId={`card-${card.id}`}
@@ -87,7 +108,7 @@ export default function Home() {
       {/* Opponent Sidebar (Right) */}
       <div className="fixed right-4 top-0 bottom-0 flex flex-col justify-center items-center z-20 pointer-events-none">
         <div className="flex flex-col -space-y-60">
-          {opponentDeck.map((card, index) => (
+          {opponentDeck.map((card) => (
             <motion.div
               key={card.id}
               layoutId={`card-${card.id}`}
@@ -115,58 +136,58 @@ export default function Home() {
         </header>
 
         <div className="relative flex items-center justify-center gap-16 min-h-[400px]">
-            {/* Player Card in Arena */}
-            {playerCard && (
-              <motion.div
-                layoutId={`card-${playerCard.id}`}
-                initial={{ x: -200, opacity: 0, rotate: -10 }}
-                animate={{ x: 0, opacity: 1, rotate: 0 }}
-                transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                className="relative"
-              >
-                <Card character={playerCard} />
-                {roundWinner === "player" && (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1.2 }}
-                    className="absolute -top-12 inset-x-0 text-center text-yellow-400 font-black text-3xl drop-shadow-[0_0_10px_rgba(250,204,21,1)]"
-                  >
-                    VICTORY
-                  </motion.div>
-                )}
-              </motion.div>
-            )}
-
-            {/* VS Divider */}
+          {/* Player Card in Arena */}
+          {playerCard && (
             <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              className="text-6xl font-black italic text-zinc-800"
+              layoutId={`card-${playerCard.id}`}
+              initial={{ x: -200, opacity: 0, rotate: -10 }}
+              animate={{ x: 0, opacity: 1, rotate: 0 }}
+              transition={{ type: "spring", stiffness: 200, damping: 20 }}
+              className="relative"
             >
-              VS
+              <Card character={playerCard} />
+              {roundWinner === "player" && (
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1.2 }}
+                  className="absolute -top-12 inset-x-0 text-center text-yellow-400 font-black text-3xl drop-shadow-[0_0_10px_rgba(250,204,21,1)]"
+                >
+                  VICTORY
+                </motion.div>
+              )}
             </motion.div>
+          )}
 
-            {/* Opponent Card in Arena */}
-            {opponentCard && (
-              <motion.div
-                layoutId={`card-${opponentCard.id}`}
-                initial={{ x: 200, opacity: 0, rotate: 10 }}
-                animate={{ x: 0, opacity: 1, rotate: 0 }}
-                transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                className="relative"
-              >
-                <Card character={opponentCard} />
-                {roundWinner === "opponent" && (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1.2 }}
-                    className="absolute -top-12 inset-x-0 text-center text-red-500 font-black text-3xl drop-shadow-[0_0_10px_rgba(239,68,68,1)]"
-                  >
-                    DEFEAT
-                  </motion.div>
-                )}
-              </motion.div>
-            )}
+          {/* VS Divider */}
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className="text-6xl font-black italic text-zinc-800"
+          >
+            VS
+          </motion.div>
+
+          {/* Opponent Card in Arena */}
+          {opponentCard && (
+            <motion.div
+              layoutId={`card-${opponentCard.id}`}
+              initial={{ x: 200, opacity: 0, rotate: 10 }}
+              animate={{ x: 0, opacity: 1, rotate: 0 }}
+              transition={{ type: "spring", stiffness: 200, damping: 20 }}
+              className="relative"
+            >
+              <Card character={opponentCard} />
+              {roundWinner === "opponent" && (
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1.2 }}
+                  className="absolute -top-12 inset-x-0 text-center text-red-500 font-black text-3xl drop-shadow-[0_0_10px_rgba(239,68,68,1)]"
+                >
+                  DEFEAT
+                </motion.div>
+              )}
+            </motion.div>
+          )}
         </div>
 
         {/* 4. CONTROLS */}
