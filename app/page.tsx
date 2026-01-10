@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useGame } from "@/hooks/useGame";
 import { Card } from "@/components/Card";
 import { GameStatus } from "@/components/GameStatus";
 import confetti from "canvas-confetti";
-import { motion, AnimatePresence, useAnimation } from "framer-motion";
+import { motion, useAnimation } from "framer-motion";
 
 export default function Home() {
   const { state, startGame, playRound, nextRound, resetGame } = useGame();
@@ -22,25 +22,37 @@ export default function Home() {
   } = state;
 
   const controls = useAnimation(); // For the shake effect
-  const [showFlash, setShowFlash] = useState(false);
+  const flashControls = useAnimation(); // For the flash effect
+  const hasFlashed = useRef(false);
 
   // Trigger Flash and Shake when a round result is declared
   useEffect(() => {
     if (gameStatus === "round-result") {
-      setShowFlash(true);
-      setTimeout(() => setShowFlash(false), 150);
+      if (!hasFlashed.current) {
+        hasFlashed.current = true;
 
-      // Shake sequence
-      controls.start({
-        x: [-10, 10, -10, 10, 0],
-        transition: { duration: 0.2 },
-      });
+        // Flash sequence
+        flashControls.start({
+          opacity: [0, 0.8, 0],
+          transition: { duration: 0.3, times: [0, 0.5, 1] },
+        });
+
+        // Shake sequence
+        controls.start({
+          x: [-10, 10, -10, 10, 0],
+          transition: { duration: 0.2 },
+        });
+      }
+    } else {
+      hasFlashed.current = false;
     }
+  }, [gameStatus, controls, flashControls]);
 
+  useEffect(() => {
     if (gameWinner === "player") {
       confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
     }
-  }, [gameStatus, gameWinner, controls]);
+  }, [gameWinner]);
 
   return (
     <motion.main
@@ -48,16 +60,11 @@ export default function Home() {
       className="relative min-h-screen bg-black text-white overflow-hidden flex items-center justify-center p-8"
     >
       {/* 1. IMPACT FLASH EFFECT */}
-      <AnimatePresence>
-        {showFlash && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.8 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-white z-[100] pointer-events-none"
-          />
-        )}
-      </AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={flashControls}
+        className="fixed inset-0 bg-white z-[100] pointer-events-none"
+      />
 
       {/* 2. SIDEBARS (Scaled down without changing Card props) */}
       {/* Player Sidebar (Left) */}
@@ -108,7 +115,6 @@ export default function Home() {
         </header>
 
         <div className="relative flex items-center justify-center gap-16 min-h-[400px]">
-          <AnimatePresence>
             {/* Player Card in Arena */}
             {playerCard && (
               <motion.div
@@ -161,7 +167,6 @@ export default function Home() {
                 )}
               </motion.div>
             )}
-          </AnimatePresence>
         </div>
 
         {/* 4. CONTROLS */}
