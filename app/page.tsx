@@ -7,12 +7,15 @@ import { GameStatus } from "@/components/GameStatus";
 import confetti from "canvas-confetti";
 import { motion, useAnimation } from "framer-motion";
 import Showcase from "@/components/sections/Showcase";
-import { Spinner } from "@/components/ui/Spinner";
+import { LoadingTransition } from "@/components/ui/Spinner";
+
+const ARENA_TRANSITION_DELAY = 1500; // ms for the zoom-out animation
 
 export default function Home() {
-  const [uiState, setUiState] = useState<"showcase" | "loading" | "arena">(
+  const [view, setView] = useState<"showcase" | "loading" | "arena">(
     "showcase"
   );
+  const [isLoading, setIsLoading] = useState(true);
   const { state, startGame, playRound, nextRound, resetGame } = useGame();
   const {
     gameStatus,
@@ -31,11 +34,19 @@ export default function Home() {
   const hasFlashed = useRef(false);
 
   const handlePlayNow = () => {
-    setUiState("loading");
+    setView("loading");
+    startGame();
+
+    // 1. Show the loading spinner for a set duration
     setTimeout(() => {
-      startGame();
-      setUiState("arena");
-    }, 1500); // 1.5 second spinner
+      // 2. Trigger the zoom-out animation in LoadingTransition
+      setIsLoading(false);
+
+      // 3. After the zoom-out animation finishes, switch to the arena
+      setTimeout(() => {
+        setView("arena");
+      }, ARENA_TRANSITION_DELAY);
+    }, 4500);
   };
 
   // Trigger Flash and Shake when a round result is declared
@@ -67,12 +78,12 @@ export default function Home() {
     }
   }, [gameWinner]);
 
-  if (uiState === "showcase") {
+  if (view === "showcase") {
     return <Showcase onPlayNow={handlePlayNow} />;
   }
 
-  if (uiState === "loading") {
-    return <Spinner />;
+  if (view === "loading") {
+    return <LoadingTransition isLoading={isLoading} />;
   }
 
   return (
