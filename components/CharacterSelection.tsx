@@ -50,11 +50,14 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
   const allCharactersSelected = characters.every(c => c !== null);
 
   return (
-    <div className="flex flex-col items-center justify-center h-full w-full">
-      <h2 className="text-3xl font-bold mb-8 text-white">Choose Your Fighters</h2>
+    <div className="flex flex-col items-center justify-center min-h-screen">
+      <div className="text-center">
+        <h2 className="text-4xl font-extrabold mb-2 text-white">CHOOSE YOUR FIVE</h2>
+        <p className="text-lg text-gray-400 mb-8">Select a card to reveal your character.</p>
+      </div>
       <div className="flex justify-center gap-4 mb-8">
         {characters.map((character, index) => (
-          <div key={index} className="flip-card" onClick={() => handleCardClick(index)}>
+          <div key={index} className={`flip-card ${!flipped[index] ? 'glow' : ''}`} onClick={() => handleCardClick(index)}>
             <div className={`flip-card-inner ${flipped[index] ? 'flipped' : ''}`}>
               <div className="flip-card-front">
                 <img src="/assets/card.png" alt="Card back" className="w-48 h-64 object-cover rounded-lg" />
@@ -70,7 +73,7 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
       <button
         onClick={() => onBattleStart(characters.filter(c => c) as GameCharacter[])}
         disabled={!allCharactersSelected}
-        className="px-8 py-4 bg-green-500 text-white font-bold rounded-lg disabled:bg-gray-500"
+        className="px-8 py-4 bg-green-600 text-white font-bold rounded-lg shadow-lg hover:bg-green-700 transition-all duration-300 disabled:bg-gray-600 disabled:cursor-not-allowed disabled:shadow-none"
       >
         Start Battle
       </button>

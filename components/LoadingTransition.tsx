@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Spinner } from './ui/Spinner';
+import { CardSpinner, Spinner } from './ui/Loaders';
 
 interface LoadingTransitionProps {
   onTransitionEnd: () => void;
@@ -20,7 +20,8 @@ const LoadingTransition = ({ onTransitionEnd }: LoadingTransitionProps) => {
 
   return (
     <div className="flex flex-col items-center justify-center h-screen w-full">
-      <Spinner />
+      {/* <Spinner /> */}
+      <CardSpinner />
       <p className="text-xl text-white mt-4">{loadingText}</p>
     </div>
   );
