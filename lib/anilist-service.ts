@@ -116,3 +116,16 @@ export const getCharacterDeck = async (count = 10): Promise<GameCharacter[]> => 
   
   return filteredResults;
 };
+
+export const getRandomCharacter = async (excludeNames: string[] = []): Promise<GameCharacter | null> => {
+  const availableNames = CHARACTER_NAMES.filter(name => !excludeNames.includes(name));
+  
+  if (availableNames.length === 0) {
+    console.warn('[anilist-service] No more unique characters to choose from.');
+    return null;
+  }
+  
+  const randomName = availableNames[Math.floor(Math.random() * availableNames.length)];
+  
+  return getCharacter(randomName);
+};

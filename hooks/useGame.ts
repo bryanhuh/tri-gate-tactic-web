@@ -1,4 +1,3 @@
-
 import { useReducer, useCallback } from 'react';
 import { getCharacterDeck } from '@/lib/anilist-service';
 import type { GameCharacter } from '@/types/game';
@@ -34,6 +33,11 @@ const initialState: GameState = {
   gameWinner: null,
 };
 
+const getTotalStats = (character: GameCharacter) => {
+    const { hp, power, defense, speed, skill } = character.stats;
+    return hp + power + defense + speed + skill;
+}
+
 const gameReducer = (state: GameState, action: GameAction): GameState => {
   switch (action.type) {
     case 'SET_LOADING':
@@ -47,7 +51,8 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       };
     case 'PLAY_ROUND': {
       if (state.playerDeck.length === 0 || state.opponentDeck.length === 0) {
-        return { ...state, gameStatus: 'game-over' };
+        const gameWinner = state.playerScore > state.opponentScore ? 'player' : 'opponent';
+        return { ...state, gameStatus: 'game-over', gameWinner };
       }
 
       const [playerCard, ...restPlayerDeck] = state.playerDeck;
@@ -57,17 +62,25 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
       let playerScore = state.playerScore;
       let opponentScore = state.opponentScore;
 
-      if (playerCard.stats.power > opponentCard.stats.power) {
+      const playerTotalStats = getTotalStats(playerCard);
+      const opponentTotalStats = getTotalStats(opponentCard);
+
+      if (playerTotalStats > opponentTotalStats) {
         roundWinner = 'player';
         playerScore++;
-      } else if (opponentCard.stats.power > playerCard.stats.power) {
+      } else if (opponentTotalStats > playerTotalStats) {
         roundWinner = 'opponent';
         opponentScore++;
       } else {
         roundWinner = 'tie';
       }
 
-      const gameWinner = playerScore === 3 ? 'player' : opponentScore === 3 ? 'opponent' : null;
+      const isGameOver = restPlayerDeck.length === 0 || restOpponentDeck.length === 0;
+      let gameWinner: 'player' | 'opponent' | null = null;
+      if(isGameOver) {
+        if(playerScore > opponentScore) gameWinner = 'player';
+        else if (opponentScore > playerScore) gameWinner = 'opponent';
+      }
 
       return {
         ...state,
@@ -78,7 +91,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         playerScore,
         opponentScore,
         roundWinner,
-        gameStatus: gameWinner ? 'game-over' : 'round-result',
+        gameStatus: isGameOver ? 'game-over' : 'round-result',
         gameWinner,
       };
     }
@@ -97,19 +110,28 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
   }
 };
 
-export const useGame = () => {
+export const useGame = (initialPlayerDeck?: GameCharacter[]) => {
   const [state, dispatch] = useReducer(gameReducer, initialState);
 
   const startGame = useCallback(async () => {
     console.log('[useGame.ts] startGame called');
     dispatch({ type: 'SET_LOADING' });
-    const deck = await getCharacterDeck(10);
-    // shuffle and split the deck for player and opponent
-    const shuffled = deck.sort(() => 0.5 - Math.random());
-    const playerDeck = shuffled.slice(0, 5);
-    const opponentDeck = shuffled.slice(5, 10);
+
+    let playerDeck: GameCharacter[];
+    let opponentDeck: GameCharacter[];
+
+    if (initialPlayerDeck) {
+      playerDeck = initialPlayerDeck;
+      opponentDeck = await getCharacterDeck(5);
+    } else {
+      const deck = await getCharacterDeck(10);
+      const shuffled = deck.sort(() => 0.5 - Math.random());
+      playerDeck = shuffled.slice(0, 5);
+      opponentDeck = shuffled.slice(5, 10);
+    }
+    
     dispatch({ type: 'START_GAME', payload: { playerDeck, opponentDeck } });
-  }, []);
+  }, [initialPlayerDeck]);
 
   const playRound = useCallback(() => {
     dispatch({ type: 'PLAY_ROUND' });
@@ -123,7 +145,8 @@ export const useGame = () => {
 
   const resetGame = useCallback(() => {
     dispatch({ type: 'RESET_GAME' });
-  }, []);
+    startGame();
+  }, [startGame]);
 
   return {
     state,
