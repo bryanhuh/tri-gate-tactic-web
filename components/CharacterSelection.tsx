@@ -4,7 +4,7 @@ import { useState } from 'react';
 import type { GameCharacter } from '@/types/game';
 import { getRandomCharacter } from '@/lib/anilist-service';
 import { Card } from './Card';
-import { Spinner } from './ui/Spinner';
+import { Spinner } from './ui/Loaders';
 
 interface CharacterSelectionProps {
   onBattleStart: (playerDeck: GameCharacter[]) => void;
