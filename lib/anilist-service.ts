@@ -21,10 +21,11 @@ query ($search: String, $id: Int) {
 
 // For MVP, we'll use a predefined list of popular characters
 const CHARACTER_NAMES = [
-  'Goku', 'Vegeta', 'Gohan', 'Piccolo', 'Krillin', 
+  'Goku', 'Vegeta', 'Gohan', 'Piccolo', 'Krillin',
   'Naruto Uzumaki', 'Sasuke Uchiha', 'Sakura Haruno', 'Kakashi Hatake', 'Itachi Uchiha',
   'Monkey D. Luffy', 'Roronoa Zoro', 'Nami', 'Sanji', 'Tony Tony Chopper',
-  'Ichigo Kurosaki', 'Rukia Kuchiki', 'Saitama', 'Genos', 'Tatsumaki'
+  'Ichigo Kurosaki', 'Rukia Kuchiki', 'Saitama', 'Genos', 'Tatsumaki',
+  'Kuririn', 'Gokuu Son'
 ];
 
 const calculateTier = (totalStats: number): Tier => {
@@ -103,18 +104,22 @@ export const getCharacter = async (name: string): Promise<GameCharacter | null> 
 
 export const getCharacterDeck = async (count = 10): Promise<GameCharacter[]> => {
   const characters: GameCharacter[] = [];
-  const shuffledNames = [...CHARACTER_NAMES].sort(() => 0.5 - Math.random());
-  const selectedNames = shuffledNames.slice(0, count);
+  const selectedNames = new Set<string>();
 
-  const characterPromises = selectedNames.map(name => getCharacter(name));
-  const results = await Promise.all(characterPromises);
-  
-  console.log('[anilist-service] Fetched characters (before filtering):', results.length, 'results');
+  while (characters.length < count) {
+    const shuffledNames = [...CHARACTER_NAMES].sort(() => 0.5 - Math.random());
+    const name = shuffledNames[0];
 
-  const filteredResults = results.filter((char): char is GameCharacter => char !== null);
-  console.log('[anilist-service] Filtered characters:', filteredResults.length, 'valid characters');
-  
-  return filteredResults;
+    if (!selectedNames.has(name)) {
+      selectedNames.add(name);
+      const character = await getCharacter(name);
+      if (character) {
+        characters.push(character);
+      }
+    }
+  }
+
+  return characters;
 };
 
 export const getRandomCharacter = async (excludeNames: string[] = []): Promise<GameCharacter | null> => {

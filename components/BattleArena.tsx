@@ -29,6 +29,9 @@ export default function BattleArena({ playerDeck }: BattleArenaProps) {
   const flashControls = useAnimation(); // For the flash effect
   const hasFlashed = useRef(false);
 
+  console.log('opponentDeck', opponentDeck)
+  console.log('playersDeck', state.playerDeck)
+
   useEffect(() => {
     startGame();
   }, [startGame]);
@@ -81,7 +84,7 @@ export default function BattleArena({ playerDeck }: BattleArenaProps) {
           {state.playerDeck.map((card) => (
             <motion.div
               key={card.id}
-              layoutId={`card-${card.id}`}
+              layoutId={`player-card-${card.id}`}
               className="origin-left scale-[0.6] hover:scale-[0.65] transition-transform pointer-events-auto"
             >
               <Card character={card} />
@@ -96,10 +99,10 @@ export default function BattleArena({ playerDeck }: BattleArenaProps) {
           {opponentDeck.map((card) => (
             <motion.div
               key={card.id}
-              layoutId={`card-${card.id}`}
+              layoutId={`opponent-card-${card.id}`}
               className="origin-right scale-[0.6] grayscale opacity-50"
             >
-              <Card character={card} isFaceDown />
+              <Card character={card} />
             </motion.div>
           ))}
         </div>

@@ -55,6 +55,8 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         return { ...state, gameStatus: 'game-over', gameWinner };
       }
 
+      // Draw the top card from each deck. The drawn card is moved to the `playerCard`
+      // and `opponentCard` state, and removed from the `playerDeck` and `opponentDeck`.
       const [playerCard, ...restPlayerDeck] = state.playerDeck;
       const [opponentCard, ...restOpponentDeck] = state.opponentDeck;
 

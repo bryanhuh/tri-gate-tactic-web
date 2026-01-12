@@ -1,13 +1,26 @@
 "use client";
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 type HeroSectionProps = {
   onPlayNow: () => void;
 };
 
 export default function HeroSection({ onPlayNow }: HeroSectionProps) {
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  const handlePlayNowClick = () => {
+    if (audioRef.current) {
+      audioRef.current.volume = 0.5; // Set volume programmatically
+      audioRef.current.play().catch(error => {
+        console.log("Audio playback initiated by user click, but still prevented:", error);
+      });
+    }
+    onPlayNow();
+  };
+
   return (
     <section className="relative w-full min-h-screen flex flex-col justify-center overflow-hidden shadow-2xl bg-indigo-950">
+      <audio ref={audioRef} src="/assets/background.mp3" />
       <div className="absolute inset-0 opacity-60">
         <img 
           src="/assets/cards.png" 
@@ -28,7 +41,7 @@ export default function HeroSection({ onPlayNow }: HeroSectionProps) {
         
         <div className="mt-8 flex gap-4">
           <button 
-            onClick={onPlayNow}
+            onClick={handlePlayNowClick}
             className="bg-yellow-400 text-black px-8 py-4 rounded-full font-black text-xl hover:bg-yellow-300 transition-transform hover:scale-105 shadow-[0_0_20px_rgba(251,191,36,0.5)]"
           >
             PLAY NOW
