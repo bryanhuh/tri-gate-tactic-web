@@ -45,6 +45,18 @@ export const GameStatus = ({ playerScore, opponentScore, roundWinner, gameWinner
       
       <div className="h-16 mt-4">
         <AnimatePresence>
+          {status === 'loading' && (
+            <motion.div
+              key="loading"
+              variants={bannerVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="text-2xl font-bold text-gray-400"
+            >
+              Loading...
+            </motion.div>
+          )}
           {winnerText && (status === 'round-result' || status === 'game-over') && (
             <motion.div
               key={winnerText}

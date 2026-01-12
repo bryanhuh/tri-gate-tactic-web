@@ -14,6 +14,7 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
   const [characters, setCharacters] = useState<(GameCharacter | null)[]>(Array(5).fill(null));
   const [loading, setLoading] = useState<boolean[]>(Array(5).fill(false));
   const [flipped, setFlipped] = useState<boolean[]>(Array(5).fill(false));
+  const [isFetchingDeck, setIsFetchingDeck] = useState(false);
 
   const handleCardClick = async (index: number) => {
     if (characters[index] || loading[index]) return;
@@ -47,6 +48,12 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
     });
   };
 
+  const handleStartBattle = async () => {
+    setIsFetchingDeck(true);
+    await onBattleStart(characters.filter(c => c) as GameCharacter[]);
+    setIsFetchingDeck(false);
+  };
+
   const allCharactersSelected = characters.every(c => c !== null);
 
   return (
@@ -71,11 +78,11 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
         ))}
       </div>
       <button
-        onClick={() => onBattleStart(characters.filter(c => c) as GameCharacter[])}
-        disabled={!allCharactersSelected}
+        onClick={handleStartBattle}
+        disabled={!allCharactersSelected || isFetchingDeck}
         className="px-8 py-4 bg-green-600 text-white font-bold rounded-lg shadow-lg hover:bg-green-700 transition-all duration-300 disabled:bg-gray-600 disabled:cursor-not-allowed disabled:shadow-none"
       >
-        Start Battle
+        {isFetchingDeck ? <Spinner /> : 'Start Battle'}
       </button>
     </div>
   );

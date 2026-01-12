@@ -1,6 +1,7 @@
 import type { GameCharacter, Tier } from '@/types/game';
 
 const ANILIST_API_URL = 'https://graphql.anilist.co';
+const RATE_LIMIT_MS = 700; // 90 requests per minute is ~667ms per request
 
 const CHARACTER_QUERY = `
 query ($search: String, $id: Int) {
@@ -52,7 +53,38 @@ const generateStats = (favourites: number, meanScore: number | null) => {
   return { hp, power, defense, speed, skill, tier };
 };
 
-export const getCharacter = async (name: string): Promise<GameCharacter | null> => {
+const requestQueue: { name: string; resolve: (value: GameCharacter | null) => void; reject: (reason?: unknown) => void; }[] = [];
+let isProcessing = false;
+
+const processQueue = async () => {
+  if (requestQueue.length === 0) {
+    isProcessing = false;
+    return;
+  }
+
+  isProcessing = true;
+  const { name, resolve, reject } = requestQueue.shift()!;
+
+  try {
+    const character = await fetchCharacter(name);
+    resolve(character);
+  } catch (error) {
+    reject(error);
+  }
+
+  setTimeout(processQueue, RATE_LIMIT_MS);
+};
+
+export const getCharacter = (name: string): Promise<GameCharacter | null> => {
+  return new Promise((resolve, reject) => {
+    requestQueue.push({ name, resolve, reject });
+    if (!isProcessing) {
+      processQueue();
+    }
+  });
+};
+
+export const fetchCharacter = async (name: string): Promise<GameCharacter | null> => {
   try {
     const response = await fetch(ANILIST_API_URL, {
       method: 'POST',

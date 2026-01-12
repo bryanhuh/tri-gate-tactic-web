@@ -17,7 +17,8 @@ export const Spinner = () => {
         }}
         animate={{ rotate: 360 }}
         transition={{
-          loop: Infinity,
+          repeat: Infinity, // Changed from loop to repeat
+          repeatType: "loop", // Optional: explicitly set the behavior
           ease: "linear",
           duration: 1,
         }}
@@ -48,7 +49,8 @@ export const CardSpinner = () => {
         }}
         animate={{ rotate: 360 }}
         transition={{
-          loop: Infinity,
+          repeat: Infinity, // Changed from loop to repeat
+          repeatType: "loop", // Optional: explicitly set the behavior
           ease: "linear",
           duration: duration,
         }}
@@ -87,7 +89,7 @@ export const CardSpinner = () => {
       
       {/* Optional Loading Text underneath */}
       <p className="absolute mt-32 text-white text-sm font-semibold tracking-wider animate-pulse">
-        LOADING DUEL...
+        LOADING...
       </p>
     </div>
   );
