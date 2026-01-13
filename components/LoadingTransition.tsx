@@ -20,7 +20,6 @@ const LoadingTransition = ({ onTransitionEnd }: LoadingTransitionProps) => {
 
   return (
     <div className="flex flex-col items-center justify-center h-screen w-full">
-      {/* <Spinner /> */}
       <CardSpinner />
       <p className="text-xl text-white mt-4">{loadingText}</p>
     </div>

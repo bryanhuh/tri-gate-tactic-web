@@ -1,0 +1,31 @@
+import { PlayerState } from '@/app/types/battle';
+import { Card } from '../Card';
+
+interface PlayerUIProps {
+  player: PlayerState;
+}
+
+export function PlayerUI({ player }: PlayerUIProps) {
+  return (
+    <div className="w-full bg-gray-900 p-4">
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-bold">Player</h2>
+        <div className="text-lg">HP: {player.hp}</div>
+      </div>
+      <div className="flex mt-4">
+        <div className="w-1/2 pr-2">
+          <h3 className="font-bold">Hand</h3>
+          <div className="flex space-x-2 overflow-x-auto">
+            {player.hand.map(card => (
+              <Card key={card.instanceId} character={card} />
+            ))}
+          </div>
+        </div>
+        <div className="w-1/2 pl-2">
+          <h3 className="font-bold">Deck</h3>
+          <p>{player.deck.length} cards</p>
+        </div>
+      </div>
+    </div>
+  );
+}

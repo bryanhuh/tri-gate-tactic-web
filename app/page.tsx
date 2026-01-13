@@ -1,47 +1,39 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useGame } from "@/hooks/useGame";
+import { useState } from "react";
 import { GameCharacter } from "@/types/game";
-import BattleArena from "@/components/BattleArena";
+import { BattleArena } from "@/components/BattleArena";
 import Showcase from "@/components/sections/Showcase";
 import LoadingTransition from "@/components/LoadingTransition";
 import CharacterSelection from "@/components/CharacterSelection";
-
-type GameView = "showcase" | "loading" | "character-selection" | "arena";
+import { useBattle } from "@/hooks/useBattle";
 
 export default function Home() {
-  const [view, setView] = useState<GameView>("showcase");
-  const [playerDeck, setPlayerDeck] = useState<GameCharacter[]>([]);
+  const { state, actions } = useBattle();
 
   const handlePlayNow = () => {
-    setView("loading");
+    actions.startBattle();
   };
 
   const handleTransitionEnd = () => {
-    setView("character-selection");
+    // You can add any logic here for when the transition ends
   };
 
-  const handleBattleStart = (deck: GameCharacter[]) => {
-    setPlayerDeck(deck);
-    setView("arena");
+  const handleCharacterSelection = (playerDeck: GameCharacter[], opponentDeck: GameCharacter[]) => {
+    actions.setupGame(playerDeck, opponentDeck);
   };
 
-  if (view === "showcase") {
+  if (state.phase === 'setup') {
+    return <CharacterSelection onBattleStart={handleCharacterSelection} />;
+  }
+  
+  if (state.phase === 'battle') {
+    return <BattleArena gameState={state} actions={actions} />;
+  }
+
+  if (state.phase === "character-selection") {
     return <Showcase onPlayNow={handlePlayNow} />;
   }
 
-  if (view === "loading") {
-    return <LoadingTransition onTransitionEnd={handleTransitionEnd} />;
-  }
-
-  if (view === "character-selection") {
-    return <CharacterSelection onBattleStart={handleBattleStart} />;
-  }
-
-  if (view === "arena") {
-    return <BattleArena playerDeck={playerDeck} />;
-  }
-
-  return null;
+  return <Showcase onPlayNow={handlePlayNow} />;
 }

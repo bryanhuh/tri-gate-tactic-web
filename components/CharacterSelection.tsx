@@ -7,13 +7,13 @@ import { Card } from './Card';
 import { Spinner } from './ui/Loaders';
 
 interface CharacterSelectionProps {
-  onBattleStart: (playerDeck: GameCharacter[]) => void;
+  onBattleStart: (playerDeck: GameCharacter[], opponentDeck: GameCharacter[]) => void;
 }
 
 const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
-  const [characters, setCharacters] = useState<(GameCharacter | null)[]>(Array(5).fill(null));
-  const [loading, setLoading] = useState<boolean[]>(Array(5).fill(false));
-  const [flipped, setFlipped] = useState<boolean[]>(Array(5).fill(false));
+  const [characters, setCharacters] = useState<(GameCharacter | null)[]>(Array(10).fill(null));
+  const [loading, setLoading] = useState<boolean[]>(Array(10).fill(false));
+  const [flipped, setFlipped] = useState<boolean[]>(Array(10).fill(false));
   const [isFetchingDeck, setIsFetchingDeck] = useState(false);
 
   const handleCardClick = async (index: number) => {
@@ -50,7 +50,9 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
 
   const handleStartBattle = async () => {
     setIsFetchingDeck(true);
-    await onBattleStart(characters.filter(c => c) as GameCharacter[]);
+    const playerDeck = characters.slice(0, 5).filter(c => c) as GameCharacter[];
+    const opponentDeck = characters.slice(5, 10).filter(c => c) as GameCharacter[];
+    await onBattleStart(playerDeck, opponentDeck);
     setIsFetchingDeck(false);
   };
 
@@ -59,10 +61,10 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
       <div className="text-center">
-        <h2 className="text-4xl font-extrabold mb-2 text-white">CHOOSE YOUR FIVE</h2>
-        <p className="text-lg text-gray-400 mb-8">Select a card to reveal your character.</p>
+        <h2 className="text-4xl font-extrabold mb-2 text-white">CHOOSE YOUR TEN</h2>
+        <p className="text-lg text-gray-400 mb-8">Select a card to reveal your character. The first 5 are yours, the next 5 are your opponent's.</p>
       </div>
-      <div className="flex justify-center gap-4 mb-8">
+      <div className="flex justify-center gap-4 mb-8 flex-wrap">
         {characters.map((character, index) => (
           <div key={index} className={`flip-card ${!flipped[index] ? 'glow' : ''}`} onClick={() => handleCardClick(index)}>
             <div className={`flip-card-inner ${flipped[index] ? 'flipped' : ''}`}>

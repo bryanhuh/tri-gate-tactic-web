@@ -1,160 +1,151 @@
-import { useReducer, useCallback } from 'react';
-import { getCharacterDeck } from '@/lib/anilist-service';
-import type { GameCharacter } from '@/types/game';
+import { GameState, BattleAction } from '@/app/types/battle';
+import { GameCharacter } from '@/types/game';
 
-type GameState = {
-  playerDeck: GameCharacter[];
-  opponentDeck: GameCharacter[];
-  playerCard: GameCharacter | null;
-  opponentCard: GameCharacter | null;
-  playerScore: number;
-  opponentScore: number;
-  gameStatus: 'initial' | 'loading' | 'playing' | 'round-result' | 'game-over';
-  roundWinner: 'player' | 'opponent' | 'tie' | null;
-  gameWinner: 'player' | 'opponent' | null;
+export const initialState: GameState = {
+  phase: 'character-selection',
+  turn: 'player',
+  player: {
+    hp: 6900,
+    hand: [],
+    field: [null, null, null],
+    deck: [],
+    graveyard: [],
+  },
+  opponent: {
+    hp: 6900,
+    hand: [],
+    field: [null, null, null],
+    deck: [],
+    graveyard: [],
+  },
 };
 
-type GameAction =
-  | { type: 'START_GAME'; payload: { playerDeck: GameCharacter[]; opponentDeck: GameCharacter[] } }
-  | { type: 'PLAY_ROUND' }
-  | { type: 'NEXT_ROUND' }
-  | { type: 'RESET_GAME' }
-  | { type: 'SET_LOADING' };
-
-const initialState: GameState = {
-  playerDeck: [],
-  opponentDeck: [],
-  playerCard: null,
-  opponentCard: null,
-  playerScore: 0,
-  opponentScore: 0,
-  gameStatus: 'initial',
-  roundWinner: null,
-  gameWinner: null,
-};
-
-const getTotalStats = (character: GameCharacter) => {
-    const { hp, power, defense, speed, skill } = character.stats;
-    return hp + power + defense + speed + skill;
-}
-
-const gameReducer = (state: GameState, action: GameAction): GameState => {
+export function gameReducer(state: GameState, action: BattleAction): GameState {
   switch (action.type) {
-    case 'SET_LOADING':
-      return { ...state, gameStatus: 'loading' };
-    case 'START_GAME':
+    case 'SETUP_GAME': {
+      const { playerDeck, opponentDeck } = action.payload;
       return {
         ...initialState,
-        playerDeck: action.payload.playerDeck,
-        opponentDeck: action.payload.opponentDeck,
-        gameStatus: 'playing',
+        phase: 'setup',
+        player: {
+          ...initialState.player,
+          deck: playerDeck,
+          hand: playerDeck.slice(0, 5),
+        },
+        opponent: {
+          ...initialState.opponent,
+          deck: opponentDeck,
+          hand: opponentDeck.slice(0, 5),
+        },
       };
-    case 'PLAY_ROUND': {
-      if (state.playerDeck.length === 0 || state.opponentDeck.length === 0) {
-        const gameWinner = state.playerScore > state.opponentScore ? 'player' : 'opponent';
-        return { ...state, gameStatus: 'game-over', gameWinner };
-      }
-
-      // Draw the top card from each deck. The drawn card is moved to the `playerCard`
-      // and `opponentCard` state, and removed from the `playerDeck` and `opponentDeck`.
-      const [playerCard, ...restPlayerDeck] = state.playerDeck;
-      const [opponentCard, ...restOpponentDeck] = state.opponentDeck;
-
-      let roundWinner: 'player' | 'opponent' | 'tie';
-      let playerScore = state.playerScore;
-      let opponentScore = state.opponentScore;
-
-      const playerTotalStats = getTotalStats(playerCard);
-      const opponentTotalStats = getTotalStats(opponentCard);
-
-      if (playerTotalStats > opponentTotalStats) {
-        roundWinner = 'player';
-        playerScore++;
-      } else if (opponentTotalStats > playerTotalStats) {
-        roundWinner = 'opponent';
-        opponentScore++;
-      } else {
-        roundWinner = 'tie';
-      }
-
-      const isGameOver = restPlayerDeck.length === 0 || restOpponentDeck.length === 0;
-      let gameWinner: 'player' | 'opponent' | null = null;
-      if(isGameOver) {
-        if(playerScore > opponentScore) gameWinner = 'player';
-        else if (opponentScore > playerScore) gameWinner = 'opponent';
-      }
+    }
+    case 'START_BATTLE': {
+        return {
+            ...state,
+            phase: 'battle',
+        }
+    }
+    case 'PLAY_CARD': {
+      const { card, position } = action.payload;
+      const newHand = state.player.hand.filter(c => c.instanceId !== card.instanceId);
+      const newField = [...state.player.field];
+      newField[position] = card;
 
       return {
         ...state,
-        playerDeck: restPlayerDeck,
-        opponentDeck: restOpponentDeck,
-        playerCard,
-        opponentCard,
-        playerScore,
-        opponentScore,
-        roundWinner,
-        gameStatus: isGameOver ? 'game-over' : 'round-result',
-        gameWinner,
+        player: {
+          ...state.player,
+          hand: newHand,
+          field: newField,
+        },
       };
     }
-    case 'NEXT_ROUND':
+    case 'SELECT_ATTACKER': {
         return {
-            ...state,
-            playerCard: null,
-            opponentCard: null,
-            roundWinner: null,
-            gameStatus: 'playing',
+          ...state,
+          selectedAttacker: action.payload.attacker,
         };
-    case 'RESET_GAME':
-      return initialState;
+      }
+  
+    case 'SELECT_TARGET': {
+    return {
+        ...state,
+        selectedTarget: action.payload.target,
+    };
+    }
+    case 'ATTACK': {
+        let { selectedAttacker, selectedTarget, player, opponent } = state;
+      
+        if (!selectedAttacker || !selectedTarget) {
+          return state; // No attacker or target selected
+        }
+      
+        const attacker = selectedAttacker;
+        const target = selectedTarget;
+      
+        const damage = Math.max(0, attacker.stats.power - target.stats.defense);
+      
+        // Update target's HP or player's HP if it's a direct attack
+        let newOpponentHp = opponent.hp;
+        let newOpponentField = [...opponent.field];
+        let newOpponentGraveyard = [...opponent.graveyard];
+      
+        const targetIndex = newOpponentField.findIndex(c => c?.instanceId === target.instanceId);
+      
+        if (targetIndex !== -1) {
+          const updatedTarget = { ...target, stats: { ...target.stats, hp: target.stats.hp - damage } };
+      
+          if (updatedTarget.stats.hp <= 0) {
+            newOpponentGraveyard.push(updatedTarget);
+            newOpponentField[targetIndex] = null;
+            const overflowDamage = Math.abs(updatedTarget.stats.hp);
+            newOpponentHp -= overflowDamage;
+          } else {
+            newOpponentField[targetIndex] = updatedTarget;
+          }
+        }
+      
+        // Reset hasAttacked for the next turn and update attacker
+        const newPlayerField = player.field.map(c => 
+          c ? { ...c, hasAttacked: c.instanceId === attacker.instanceId ? true : c.hasAttacked } : c
+        );
+      
+        return {
+          ...state,
+          player: {
+            ...player,
+            field: newPlayerField,
+          },
+          opponent: {
+            ...opponent,
+            hp: newOpponentHp,
+            field: newOpponentField,
+            graveyard: newOpponentGraveyard,
+          },
+          selectedAttacker: undefined,
+          selectedTarget: undefined,
+        };
+      }
+      
+    case 'END_TURN': {
+      // Reset attack status for all characters on the field
+      const newPlayerField = state.player.field.map(c => c ? { ...c, hasAttacked: false } : null);
+      const newOpponentField = state.opponent.field.map(c => c ? { ...c, hasAttacked: false } : null);
+
+      return {
+        ...state,
+        turn: state.turn === 'player' ? 'opponent' : 'player',
+        player: {
+          ...state.player,
+          field: newPlayerField,
+        },
+        opponent: {
+          ...state.opponent,
+          field: newOpponentField,
+        },
+      };
+    }
     default:
       return state;
   }
-};
-
-export const useGame = (initialPlayerDeck?: GameCharacter[]) => {
-  const [state, dispatch] = useReducer(gameReducer, initialState);
-
-  const startGame = useCallback(async () => {
-    console.log('[useGame.ts] startGame called');
-    dispatch({ type: 'SET_LOADING' });
-
-    let playerDeck: GameCharacter[];
-    let opponentDeck: GameCharacter[];
-
-    if (initialPlayerDeck) {
-      playerDeck = initialPlayerDeck;
-      opponentDeck = await getCharacterDeck(5);
-    } else {
-      const deck = await getCharacterDeck(10);
-      const shuffled = deck.sort(() => 0.5 - Math.random());
-      playerDeck = shuffled.slice(0, 5);
-      opponentDeck = shuffled.slice(5, 10);
-    }
-    
-    dispatch({ type: 'START_GAME', payload: { playerDeck, opponentDeck } });
-  }, [initialPlayerDeck]);
-
-  const playRound = useCallback(() => {
-    dispatch({ type: 'PLAY_ROUND' });
-  }, []);
-
-  const nextRound = useCallback(() => {
-    if (state.gameStatus === 'round-result') {
-      dispatch({ type: 'NEXT_ROUND' });
-    }
-  }, [state.gameStatus]);
-
-  const resetGame = useCallback(() => {
-    dispatch({ type: 'RESET_GAME' });
-    startGame();
-  }, [startGame]);
-
-  return {
-    state,
-    startGame,
-    playRound,
-    nextRound,
-    resetGame,
-  };
-};
+}
