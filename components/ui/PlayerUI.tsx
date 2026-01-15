@@ -16,7 +16,7 @@ export function PlayerUI({ player }: PlayerUIProps) {
                 alt="Player Avatar" 
                 width={50} 
                 height={50} 
-                className="rounded-full mr-4 border-2 border-green-500"
+                className="rounded-full mr-4 border-2 border-green-500 object-cover h-[50px] w-[50px]"
             />
             <h2 className="text-xl font-bold">Player</h2>
         </div>

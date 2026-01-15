@@ -22,11 +22,32 @@ query ($search: String, $id: Int) {
 
 // For MVP, we'll use a predefined list of popular characters
 const CHARACTER_NAMES = [
-  'Goku', 'Vegeta', 'Gohan', 'Piccolo', 'Krillin',
-  'Naruto Uzumaki', 'Sasuke Uchiha', 'Sakura Haruno', 'Kakashi Hatake', 'Itachi Uchiha',
-  'Monkey D. Luffy', 'Roronoa Zoro', 'Nami', 'Sanji', 'Tony Tony Chopper',
-  'Ichigo Kurosaki', 'Rukia Kuchiki', 'Saitama', 'Genos', 'Tatsumaki',
-  'Kuririn', 'Gokuu Son'
+  // Dragon Ball
+  'Goku', 'Vegeta', 'Gohan', 'Piccolo', 'Frieza', 'Trunks', 'Majin Buu',
+  // Naruto
+  'Naruto Uzumaki', 'Sasuke Uchiha', 'Sakura Haruno', 'Kakashi Hatake', 'Itachi Uchiha', 'Gaara', 'Jiraiya', 'Hinata Hyuga',
+  // One Piece
+  'Monkey D. Luffy', 'Roronoa Zoro', 'Nami', 'Sanji', 'Tony Tony Chopper', 'Nico Robin', 'Usopp', 'Shanks',
+  // Bleach
+  'Ichigo Kurosaki', 'Rukia Kuchiki', 'Sosuke Aizen', 'Kenpachi Zaraki', 'Byakuya Kuchiki',
+  // One Punch Man
+  'Saitama', 'Genos', 'Tatsumaki', 'Garou',
+  // Attack on Titan
+  'Eren Yeager', 'Mikasa Ackerman', 'Levi Ackerman', 'Armin Arlert',
+  // My Hero Academia
+  'Izuku Midoriya', 'Katsuki Bakugo', 'Shoto Todoroki', 'All Might', 'Ochaco Uraraka',
+  // Hunter x Hunter
+  'Gon Freecss', 'Killua Zoldyck', 'Hisoka Morow', 'Kurapika',
+  // Demon Slayer
+  'Tanjiro Kamado', 'Nezuko Kamado', 'Zenitsu Agatsuma', 'Inosuke Hashibira', 'Kyojuro Rengoku',
+  // Jujutsu Kaisen
+  'Yuji Itadori', 'Satoru Gojo', 'Megumi Fushiguro', 'Nobara Kugisaki',
+  // Fullmetal Alchemist
+  'Edward Elric', 'Alphonse Elric', 'Roy Mustang',
+  // Death Note
+  'Light Yagami', 'L Lawliet', 'Ryuk',
+  // Others
+  'Spike Spiegel', 'Guts', 'Natsu Dragneel', 'Erza Scarlet', 'Yusuke Urameshi'
 ];
 
 const calculateTier = (totalStats: number): Tier => {

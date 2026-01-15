@@ -16,6 +16,38 @@ interface BattleArenaProps {
 export function BattleArena({ gameState, actions }: BattleArenaProps) {
   const { player, opponent, selectedAttacker, turn } = gameState;
   const [showPlayerDeck, setShowPlayerDeck] = useState(false);
+  const [isAutoMode, setIsAutoMode] = useState(false);
+
+  // Player Auto Mode AI
+  useEffect(() => {
+    if (turn === 'player' && isAutoMode) {
+        const timer = setTimeout(() => {
+            const availableAttackers = player.field.filter(c => c && !c.hasAttacked);
+            const availableTargets = opponent.field.filter(c => c !== null);
+
+            if (availableAttackers.length > 0 && availableTargets.length > 0) {
+                const attacker = availableAttackers[Math.floor(Math.random() * availableAttackers.length)];
+                const target = availableTargets[Math.floor(Math.random() * availableTargets.length)];
+                
+                if (attacker && target) {
+                    actions.selectAttacker(attacker);
+                    setTimeout(() => {
+                        actions.selectTarget(target);
+                        setTimeout(() => {
+                            actions.attack();
+                            setTimeout(() => {
+                                actions.endTurn();
+                            }, 1000);
+                        }, 500);
+                    }, 500);
+                }
+            } else {
+                 actions.endTurn();
+            }
+        }, 2000);
+        return () => clearTimeout(timer);
+    }
+  }, [turn, isAutoMode, player.field, opponent.field, actions]);
 
   // Opponent AI
   useEffect(() => {
@@ -69,6 +101,8 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
   }, [turn, opponent.field, player.field, actions]);
 
   const handleCardClick = (card: any) => {
+    if (isAutoMode) return;
+    
     if (gameState.turn === 'player') {
       if (player.field.includes(card) && !card.hasAttacked) {
         actions.selectAttacker(card);
@@ -133,6 +167,12 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
           
           <div className="absolute bottom-4 right-4 flex gap-2">
              <button 
+                onClick={() => setIsAutoMode(!isAutoMode)}
+                className={`px-4 py-2 rounded font-bold ${isAutoMode ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-gray-600 hover:bg-gray-500'}`}
+             >
+                Mode: {isAutoMode ? 'Auto' : 'Manual'}
+             </button>
+             <button 
                 onClick={() => setShowPlayerDeck(true)}
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded font-bold"
              >
@@ -140,7 +180,7 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
              </button>
              <button 
                 onClick={() => actions.endTurn()}
-                disabled={turn !== 'player'}
+                disabled={turn !== 'player' || isAutoMode}
                 className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 rounded font-bold"
              >
                 End Turn

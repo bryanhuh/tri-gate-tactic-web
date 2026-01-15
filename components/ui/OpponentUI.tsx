@@ -13,9 +13,9 @@ export function OpponentUI({ opponent }: OpponentUIProps) {
             <Image 
                 src="/assets/opponent.png" 
                 alt="Opponent Avatar" 
-                width={50} 
-                height={50} 
-                className="rounded-full mr-4 border-2 border-red-500"
+                width={70} 
+                height={70} 
+                className="rounded-full mr-4 border-2 border-red-500 object-cover h-[70px] w-[70px]"
             />
             <h2 className="text-xl font-bold">Opponent</h2>
         </div>
