@@ -30,11 +30,25 @@ const CHARACTER_NAMES = [
 ];
 
 const calculateTier = (totalStats: number): Tier => {
-  if (totalStats > 450) return 'S+';
-  if (totalStats > 400) return 'S';
-  if (totalStats > 350) return 'A+';
-  if (totalStats > 300) return 'A';
-  return 'A-';
+  if (totalStats >= 480) return 'S++';
+  if (totalStats >= 460) return 'S+';
+  if (totalStats >= 440) return 'S';
+  
+  if (totalStats >= 410) return 'A+';
+  if (totalStats >= 390) return 'A';
+  if (totalStats >= 370) return 'A-';
+  
+  if (totalStats >= 340) return 'B+';
+  if (totalStats >= 320) return 'B';
+  if (totalStats >= 300) return 'B-';
+  
+  if (totalStats >= 270) return 'C+';
+  if (totalStats >= 250) return 'C';
+  if (totalStats >= 230) return 'C-';
+  
+  if (totalStats >= 200) return 'D+';
+  if (totalStats >= 180) return 'D';
+  return 'D-';
 };
 
 const generateStats = (favourites: number, meanScore: number | null) => {

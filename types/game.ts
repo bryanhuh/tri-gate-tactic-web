@@ -1,4 +1,4 @@
-export type Tier = 'S+' | 'S' | 'A+' | 'A' | 'A-';
+export type Tier = 'S++' | 'S+' | 'S' | 'A+' | 'A' | 'A-' | 'B+' | 'B' | 'B-' | 'C+' | 'C' | 'C-' | 'D+' | 'D' | 'D-';
 
 export interface GameCharacter {
   id: number;

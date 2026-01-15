@@ -31,13 +31,12 @@ export const Card = ({ character, isFaceDown = false, onClick, className = '' }:
   }
 
   const getTierColor = (tier: string) => {
-    switch (tier) {
-      case 'S+': return 'text-yellow-400 border-yellow-400';
-      case 'S': return 'text-yellow-200 border-yellow-200';
-      case 'A+': return 'text-purple-400 border-purple-400';
-      case 'A': return 'text-purple-200 border-purple-200';
-      default: return 'text-gray-300 border-gray-300';
-    }
+    if (tier.startsWith('S')) return 'text-yellow-400 border-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.5)]'; // Gold
+    if (tier.startsWith('A')) return 'text-purple-400 border-purple-400'; // Purple
+    if (tier.startsWith('B')) return 'text-blue-400 border-blue-400'; // Blue
+    if (tier.startsWith('C')) return 'text-green-400 border-green-400'; // Green
+    if (tier.startsWith('D')) return 'text-gray-400 border-gray-400'; // Gray
+    return 'text-gray-300 border-gray-300';
   };
 
   const tierColor = getTierColor(character.tier || 'B');
