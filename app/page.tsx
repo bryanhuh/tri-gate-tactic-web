@@ -33,7 +33,7 @@ export default function Home() {
   }
   
   if (state.phase === 'reveal') {
-    return <OpponentReveal opponentDeck={state.opponent.hand} onComplete={handleRevealComplete} />;
+    return <OpponentReveal opponentDeck={state.opponent.deck} onComplete={handleRevealComplete} />;
   }
 
   if (state.phase === 'battle') {

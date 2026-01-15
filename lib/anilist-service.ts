@@ -131,6 +131,7 @@ export const fetchCharacter = async (name: string): Promise<GameCharacter | null
 
     return {
       id: character.id,
+      instanceId: 'temp-id',
       name: character.name.full,
       image: character.image.large,
       tier: stats.tier,

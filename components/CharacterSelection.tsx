@@ -58,7 +58,11 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
     const opponentDeck: GameCharacter[] = [];
     const excludeNames = [...playerDeck.map(c => c.name)];
     
-    for (let i = 0; i < 5; i++) {
+    let attempts = 0;
+    const maxAttempts = 20;
+
+    while (opponentDeck.length < 5 && attempts < maxAttempts) {
+        attempts++;
         const char = await getRandomCharacter(excludeNames);
         if (char) {
             opponentDeck.push(char);
