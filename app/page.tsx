@@ -6,6 +6,7 @@ import { BattleArena } from "@/components/BattleArena";
 import Showcase from "@/components/sections/Showcase";
 import LoadingTransition from "@/components/LoadingTransition";
 import CharacterSelection from "@/components/CharacterSelection";
+import OpponentReveal from "@/components/OpponentReveal";
 import { useBattle } from "@/hooks/useBattle";
 
 export default function Home() {
@@ -23,10 +24,18 @@ export default function Home() {
     actions.setupGame(playerDeck, opponentDeck);
   };
 
+  const handleRevealComplete = () => {
+    actions.beginFight();
+  };
+
   if (state.phase === 'setup') {
     return <CharacterSelection onBattleStart={handleCharacterSelection} />;
   }
   
+  if (state.phase === 'reveal') {
+    return <OpponentReveal opponentDeck={state.opponent.hand} onComplete={handleRevealComplete} />;
+  }
+
   if (state.phase === 'battle') {
     return <BattleArena gameState={state} actions={actions} />;
   }

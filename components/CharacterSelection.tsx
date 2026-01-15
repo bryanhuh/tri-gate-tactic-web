@@ -11,9 +11,9 @@ interface CharacterSelectionProps {
 }
 
 const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
-  const [characters, setCharacters] = useState<(GameCharacter | null)[]>(Array(10).fill(null));
-  const [loading, setLoading] = useState<boolean[]>(Array(10).fill(false));
-  const [flipped, setFlipped] = useState<boolean[]>(Array(10).fill(false));
+  const [characters, setCharacters] = useState<(GameCharacter | null)[]>(Array(5).fill(null));
+  const [loading, setLoading] = useState<boolean[]>(Array(5).fill(false));
+  const [flipped, setFlipped] = useState<boolean[]>(Array(5).fill(false));
   const [isFetchingDeck, setIsFetchingDeck] = useState(false);
 
   const handleCardClick = async (index: number) => {
@@ -50,8 +50,20 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
 
   const handleStartBattle = async () => {
     setIsFetchingDeck(true);
-    const playerDeck = characters.slice(0, 5).filter(c => c) as GameCharacter[];
-    const opponentDeck = characters.slice(5, 10).filter(c => c) as GameCharacter[];
+    const playerDeck = characters.filter(c => c) as GameCharacter[];
+    
+    // Generate opponent deck
+    const opponentDeck: GameCharacter[] = [];
+    const excludeNames = [...playerDeck.map(c => c.name)];
+    
+    for (let i = 0; i < 5; i++) {
+        const char = await getRandomCharacter(excludeNames);
+        if (char) {
+            opponentDeck.push(char);
+            excludeNames.push(char.name);
+        }
+    }
+
     await onBattleStart(playerDeck, opponentDeck);
     setIsFetchingDeck(false);
   };
@@ -61,8 +73,8 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
       <div className="text-center">
-        <h2 className="text-4xl font-extrabold mb-2 text-white">CHOOSE YOUR TEN</h2>
-        <p className="text-lg text-gray-400 mb-8">Select a card to reveal your character. The first 5 are yours, the next 5 are your opponent's.</p>
+        <h2 className="text-4xl font-extrabold mb-2 text-white">ASSEMBLE YOUR TEAM</h2>
+        <p className="text-lg text-gray-400 mb-8">Select 5 cards to reveal your champions.</p>
       </div>
       <div className="flex justify-center gap-4 mb-8 flex-wrap">
         {characters.map((character, index) => (
@@ -82,7 +94,7 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
       <button
         onClick={handleStartBattle}
         disabled={!allCharactersSelected || isFetchingDeck}
-        className="px-8 py-4 bg-green-600 text-white font-bold rounded-lg shadow-lg hover:bg-green-700 transition-all duration-300 disabled:bg-gray-600 disabled:cursor-not-allowed disabled:shadow-none"
+        className="px-8 py-4 bg-green-600 text-white font-bold rounded-lg shadow-lg hover:bg-green-700 transition-all duration-300 disabled:bg-gray-600 disabled:cursor-not-allowed disabled:shadow-none transform hover:scale-105"
       >
         {isFetchingDeck ? <Spinner /> : 'Start Battle'}
       </button>

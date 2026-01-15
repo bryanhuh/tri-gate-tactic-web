@@ -13,6 +13,7 @@ export function useBattle() {
       dispatch({ type: 'SETUP_GAME', payload: { playerDeck: playerDeckWithIds, opponentDeck: opponentDeckWithIds } });
     },
     startBattle: () => dispatch({ type: 'START_BATTLE' }),
+    beginFight: () => dispatch({ type: 'BEGIN_FIGHT' }),
     playCard: (card: GameCharacter, position: number) => dispatch({ type: 'PLAY_CARD', payload: { card, position } }),
     selectAttacker: (attacker: GameCharacter) => dispatch({ type: 'SELECT_ATTACKER', payload: { attacker } }),
     selectTarget: (target: GameCharacter) => dispatch({ type: 'SELECT_TARGET', payload: { target } }),

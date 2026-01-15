@@ -1,6 +1,6 @@
 import { GameCharacter } from '@/types/game';
 
-export type GamePhase = 'setup' |'character-selection' | 'battle' | 'game-over';
+export type GamePhase = 'setup' |'character-selection' | 'reveal' | 'battle' | 'game-over';
 export type Turn = 'player' | 'opponent';
 
 export interface PlayerState {
@@ -28,4 +28,5 @@ export type BattleAction =
   | { type: 'SELECT_TARGET'; payload: { target: GameCharacter } }
   | { type: 'ATTACK' }
   | { type: 'END_TURN' }
+  | { type: 'BEGIN_FIGHT' }
   | { type: 'GAME_OVER' };

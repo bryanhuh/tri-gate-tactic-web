@@ -24,26 +24,41 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
   switch (action.type) {
     case 'SETUP_GAME': {
       const { playerDeck, opponentDeck } = action.payload;
+      
+      const playerField = [playerDeck[0], playerDeck[1], playerDeck[2]];
+      const playerHand = playerDeck.slice(3, 5); // Assuming 5 cards total selected, so 2 in hand
+      
+      const opponentField = [opponentDeck[0], opponentDeck[1], opponentDeck[2]];
+      const opponentHand = opponentDeck.slice(3, 5);
+
       return {
         ...initialState,
-        phase: 'setup',
+        phase: 'reveal',
         player: {
           ...initialState.player,
           deck: playerDeck,
-          hand: playerDeck.slice(0, 5),
+          hand: playerHand,
+          field: playerField,
         },
         opponent: {
           ...initialState.opponent,
           deck: opponentDeck,
-          hand: opponentDeck.slice(0, 5),
+          hand: opponentHand,
+          field: opponentField,
         },
       };
     }
     case 'START_BATTLE': {
         return {
             ...state,
-            phase: 'battle',
+            phase: 'setup',
         }
+    }
+    case 'BEGIN_FIGHT': {
+      return {
+        ...state,
+        phase: 'battle',
+      };
     }
     case 'PLAY_CARD': {
       const { card, position } = action.payload;
