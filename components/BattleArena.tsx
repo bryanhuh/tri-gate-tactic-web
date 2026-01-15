@@ -14,7 +14,7 @@ interface BattleArenaProps {
 }
 
 export function BattleArena({ gameState, actions }: BattleArenaProps) {
-  const { player, opponent, selectedAttacker, turn, battleLog = [] } = gameState;
+  const { player, opponent, selectedAttacker, turn, battleLog = [], turnCount = 1 } = gameState;
   const [showPlayerDeck, setShowPlayerDeck] = useState(false);
   const [isAutoMode, setIsAutoMode] = useState(false);
   const logEndRef = useRef<HTMLDivElement>(null);
@@ -128,6 +128,11 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
   return (
     <div className="flex flex-col items-center justify-between w-full h-screen bg-gray-900 text-white overflow-hidden relative">
       
+      {/* Round Indicator */}
+      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20 bg-black/50 backdrop-blur-md border border-gray-600 px-6 py-2 rounded-full shadow-lg">
+         <h2 className="text-xl font-bold tracking-widest text-white">ROUND {turnCount}</h2>
+      </div>
+
       {/* Battle Status / Turn Indicator */}
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0 opacity-20">
          <h1 className="text-9xl font-bold uppercase tracking-widest">{turn}</h1>

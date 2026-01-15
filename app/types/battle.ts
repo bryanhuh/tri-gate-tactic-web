@@ -14,6 +14,7 @@ export interface PlayerState {
 export interface GameState {
   phase: GamePhase;
   turn: Turn;
+  turnCount: number;
   player: PlayerState;
   opponent: PlayerState;
   selectedAttacker?: GameCharacter;

@@ -4,15 +4,16 @@ import { GameCharacter } from '@/types/game';
 export const initialState: GameState = {
   phase: 'character-selection',
   turn: 'player',
+  turnCount: 1,
   player: {
-    hp: 6900,
+    hp: 1000,
     hand: [],
     field: [null, null, null],
     deck: [],
     graveyard: [],
   },
   opponent: {
-    hp: 6900,
+    hp: 1000,
     hand: [],
     field: [null, null, null],
     deck: [],
@@ -109,22 +110,18 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
         const opponentTargetIndex = newOpponent.field.findIndex(c => c?.instanceId === target.instanceId);
         
         if (opponentTargetIndex !== -1) {
-             // Handle damage to Opponent Card
+             // Handle damage to Opponent Card and Opponent HP
              const updatedTarget = { ...target, stats: { ...target.stats, hp: target.stats.hp - damage } };
              let newOpponentField = [...newOpponent.field];
              let newOpponentGraveyard = [...newOpponent.graveyard];
              
+             newOpponent.hp -= damage;
              logMessage = `${attacker.name} dealt ${damage} damage to ${target.name}.`;
 
              if (updatedTarget.stats.hp <= 0) {
                  newOpponentGraveyard.push(updatedTarget);
                  newOpponentField[opponentTargetIndex] = null;
-                 const overflowDamage = Math.abs(updatedTarget.stats.hp);
-                 newOpponent.hp -= overflowDamage;
                  logMessage += ` ${target.name} was defeated!`;
-                 if (overflowDamage > 0) {
-                     logMessage += ` Opponent took ${overflowDamage} overflow damage!`;
-                 }
              } else {
                  newOpponentField[opponentTargetIndex] = updatedTarget;
              }
@@ -145,22 +142,18 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
              const playerTargetIndex = newPlayer.field.findIndex(c => c?.instanceId === target.instanceId);
              
              if (playerTargetIndex !== -1) {
-                 // Handle damage to Player Card
+                 // Handle damage to Player Card and Player HP
                  const updatedTarget = { ...target, stats: { ...target.stats, hp: target.stats.hp - damage } };
                  let newPlayerField = [...newPlayer.field];
                  let newPlayerGraveyard = [...newPlayer.graveyard];
 
+                 newPlayer.hp -= damage;
                  logMessage = `Opponent's ${attacker.name} dealt ${damage} damage to your ${target.name}.`;
 
                  if (updatedTarget.stats.hp <= 0) {
                      newPlayerGraveyard.push(updatedTarget);
                      newPlayerField[playerTargetIndex] = null;
-                     const overflowDamage = Math.abs(updatedTarget.stats.hp);
-                     newPlayer.hp -= overflowDamage;
                      logMessage += ` Your ${target.name} was defeated!`;
-                     if (overflowDamage > 0) {
-                         logMessage += ` You took ${overflowDamage} overflow damage!`;
-                     }
                  } else {
                      newPlayerField[playerTargetIndex] = updatedTarget;
                  }
@@ -192,10 +185,14 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
       // Reset attack status for all characters on the field
       const newPlayerField = state.player.field.map(c => c ? { ...c, hasAttacked: false } : null);
       const newOpponentField = state.opponent.field.map(c => c ? { ...c, hasAttacked: false } : null);
+      
+      const newTurn = state.turn === 'player' ? 'opponent' : 'player';
+      const newTurnCount = newTurn === 'player' ? state.turnCount + 1 : state.turnCount;
 
       return {
         ...state,
-        turn: state.turn === 'player' ? 'opponent' : 'player',
+        turn: newTurn,
+        turnCount: newTurnCount,
         player: {
           ...state.player,
           field: newPlayerField,

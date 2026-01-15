@@ -75,12 +75,17 @@ const calculateTier = (totalStats: number): Tier => {
 const generateStats = (favourites: number, meanScore: number | null) => {
   const score = meanScore || 75; // Default score if not available
 
-  // Normalize and scale stats to be out of 100
-  const power = Math.min(100, Math.floor(score * 1.2));
-  const defense = Math.min(100, Math.floor(favourites / 150));
-  const hp = Math.min(100, Math.floor((power + defense) / 2));
-  const speed = Math.floor(Math.random() * 50) + 50; // 50-99
-  const skill = Math.floor(Math.random() * 50) + 50; // 50-99
+  // Power ~120-160
+  const power = Math.floor(score * 1.6);
+  
+  // Defense ~0-100. Lower divider means higher defense, but we want it capped.
+  const defense = Math.min(100, Math.floor(favourites / 300));
+  
+  // HP derived from power and defense
+  const hp = Math.floor((power + defense) * 0.8);
+  
+  const speed = Math.floor(Math.random() * 50) + 50; // 50-100
+  const skill = Math.floor(Math.random() * 50) + 50; // 50-100
 
   const total = hp + power + defense + speed + skill;
   const tier = calculateTier(total);
