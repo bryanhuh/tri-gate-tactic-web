@@ -18,6 +18,7 @@ export const initialState: GameState = {
     deck: [],
     graveyard: [],
   },
+  battleLog: [],
 };
 
 export function gameReducer(state: GameState, action: BattleAction): GameState {
@@ -58,6 +59,7 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
       return {
         ...state,
         phase: 'battle',
+        battleLog: ['Battle Started!'],
       };
     }
     case 'PLAY_CARD': {
@@ -101,6 +103,7 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
 
         let newPlayer = { ...player };
         let newOpponent = { ...opponent };
+        let logMessage = '';
 
         // Check if target is in opponent's field (Player Attacking)
         const opponentTargetIndex = newOpponent.field.findIndex(c => c?.instanceId === target.instanceId);
@@ -110,12 +113,18 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
              const updatedTarget = { ...target, stats: { ...target.stats, hp: target.stats.hp - damage } };
              let newOpponentField = [...newOpponent.field];
              let newOpponentGraveyard = [...newOpponent.graveyard];
+             
+             logMessage = `${attacker.name} dealt ${damage} damage to ${target.name}.`;
 
              if (updatedTarget.stats.hp <= 0) {
                  newOpponentGraveyard.push(updatedTarget);
                  newOpponentField[opponentTargetIndex] = null;
                  const overflowDamage = Math.abs(updatedTarget.stats.hp);
                  newOpponent.hp -= overflowDamage;
+                 logMessage += ` ${target.name} was defeated!`;
+                 if (overflowDamage > 0) {
+                     logMessage += ` Opponent took ${overflowDamage} overflow damage!`;
+                 }
              } else {
                  newOpponentField[opponentTargetIndex] = updatedTarget;
              }
@@ -127,6 +136,10 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
                  c?.instanceId === attacker.instanceId ? { ...c, hasAttacked: true } : c
              );
 
+             if (newOpponent.hp <= 0) {
+                 logMessage += " Player wins the battle!";
+             }
+
         } else {
              // Check if target is in player's field (Opponent Attacking)
              const playerTargetIndex = newPlayer.field.findIndex(c => c?.instanceId === target.instanceId);
@@ -137,11 +150,17 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
                  let newPlayerField = [...newPlayer.field];
                  let newPlayerGraveyard = [...newPlayer.graveyard];
 
+                 logMessage = `Opponent's ${attacker.name} dealt ${damage} damage to your ${target.name}.`;
+
                  if (updatedTarget.stats.hp <= 0) {
                      newPlayerGraveyard.push(updatedTarget);
                      newPlayerField[playerTargetIndex] = null;
                      const overflowDamage = Math.abs(updatedTarget.stats.hp);
                      newPlayer.hp -= overflowDamage;
+                     logMessage += ` Your ${target.name} was defeated!`;
+                     if (overflowDamage > 0) {
+                         logMessage += ` You took ${overflowDamage} overflow damage!`;
+                     }
                  } else {
                      newPlayerField[playerTargetIndex] = updatedTarget;
                  }
@@ -152,6 +171,10 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
                  newOpponent.field = newOpponent.field.map(c => 
                      c?.instanceId === attacker.instanceId ? { ...c, hasAttacked: true } : c
                  );
+
+                 if (newPlayer.hp <= 0) {
+                     logMessage += " You lost the battle!";
+                 }
              }
         }
       
@@ -161,6 +184,7 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
           opponent: newOpponent,
           selectedAttacker: undefined,
           selectedTarget: undefined,
+          battleLog: [...state.battleLog, logMessage],
         };
       }
       

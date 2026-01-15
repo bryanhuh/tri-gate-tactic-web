@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { GameState } from '@/app/types/battle';
 import { PlayerUI } from './ui/PlayerUI';
 import { OpponentUI } from './ui/OpponentUI';
@@ -14,9 +14,14 @@ interface BattleArenaProps {
 }
 
 export function BattleArena({ gameState, actions }: BattleArenaProps) {
-  const { player, opponent, selectedAttacker, turn } = gameState;
+  const { player, opponent, selectedAttacker, turn, battleLog = [] } = gameState;
   const [showPlayerDeck, setShowPlayerDeck] = useState(false);
   const [isAutoMode, setIsAutoMode] = useState(false);
+  const logEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    logEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [battleLog]);
 
   // Player Auto Mode AI
   useEffect(() => {
@@ -126,6 +131,20 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
       {/* Battle Status / Turn Indicator */}
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0 opacity-20">
          <h1 className="text-9xl font-bold uppercase tracking-widest">{turn}</h1>
+      </div>
+
+      {/* Battle Log */}
+      <div className="absolute top-20 right-4 w-80 h-48 bg-black/60 backdrop-blur-sm border border-gray-700 rounded-lg p-2 overflow-y-auto z-20 text-sm font-mono shadow-lg">
+          <h3 className="text-gray-400 text-xs uppercase mb-2 border-b border-gray-700 pb-1">Battle Log</h3>
+          <div className="flex flex-col gap-1">
+             {battleLog.map((log, index) => (
+                 <div key={index} className="text-gray-200 break-words leading-tight">
+                     <span className="text-gray-500 mr-2">[{index + 1}]</span>
+                     {log}
+                 </div>
+             ))}
+             <div ref={logEndRef} />
+          </div>
       </div>
 
       <div className="w-full z-10 bg-gray-800/80 backdrop-blur-sm border-b border-gray-700">

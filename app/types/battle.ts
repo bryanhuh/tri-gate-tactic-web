@@ -18,6 +18,7 @@ export interface GameState {
   opponent: PlayerState;
   selectedAttacker?: GameCharacter;
   selectedTarget?: GameCharacter;
+  battleLog: string[];
 }
 
 export type BattleAction =
