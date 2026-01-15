@@ -89,54 +89,76 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
     };
     }
     case 'ATTACK': {
-        let { selectedAttacker, selectedTarget, player, opponent } = state;
+        const { selectedAttacker, selectedTarget, player, opponent } = state;
       
         if (!selectedAttacker || !selectedTarget) {
-          return state; // No attacker or target selected
+          return state;
         }
       
         const attacker = selectedAttacker;
         const target = selectedTarget;
-      
         const damage = Math.max(0, attacker.stats.power - target.stats.defense);
-      
-        // Update target's HP or player's HP if it's a direct attack
-        let newOpponentHp = opponent.hp;
-        let newOpponentField = [...opponent.field];
-        let newOpponentGraveyard = [...opponent.graveyard];
-      
-        const targetIndex = newOpponentField.findIndex(c => c?.instanceId === target.instanceId);
-      
-        if (targetIndex !== -1) {
-          const updatedTarget = { ...target, stats: { ...target.stats, hp: target.stats.hp - damage } };
-      
-          if (updatedTarget.stats.hp <= 0) {
-            newOpponentGraveyard.push(updatedTarget);
-            newOpponentField[targetIndex] = null;
-            const overflowDamage = Math.abs(updatedTarget.stats.hp);
-            newOpponentHp -= overflowDamage;
-          } else {
-            newOpponentField[targetIndex] = updatedTarget;
-          }
+
+        let newPlayer = { ...player };
+        let newOpponent = { ...opponent };
+
+        // Check if target is in opponent's field (Player Attacking)
+        const opponentTargetIndex = newOpponent.field.findIndex(c => c?.instanceId === target.instanceId);
+        
+        if (opponentTargetIndex !== -1) {
+             // Handle damage to Opponent Card
+             const updatedTarget = { ...target, stats: { ...target.stats, hp: target.stats.hp - damage } };
+             let newOpponentField = [...newOpponent.field];
+             let newOpponentGraveyard = [...newOpponent.graveyard];
+
+             if (updatedTarget.stats.hp <= 0) {
+                 newOpponentGraveyard.push(updatedTarget);
+                 newOpponentField[opponentTargetIndex] = null;
+                 const overflowDamage = Math.abs(updatedTarget.stats.hp);
+                 newOpponent.hp -= overflowDamage;
+             } else {
+                 newOpponentField[opponentTargetIndex] = updatedTarget;
+             }
+             newOpponent.field = newOpponentField;
+             newOpponent.graveyard = newOpponentGraveyard;
+
+             // Mark Player Attacker as hasAttacked
+             newPlayer.field = newPlayer.field.map(c => 
+                 c?.instanceId === attacker.instanceId ? { ...c, hasAttacked: true } : c
+             );
+
+        } else {
+             // Check if target is in player's field (Opponent Attacking)
+             const playerTargetIndex = newPlayer.field.findIndex(c => c?.instanceId === target.instanceId);
+             
+             if (playerTargetIndex !== -1) {
+                 // Handle damage to Player Card
+                 const updatedTarget = { ...target, stats: { ...target.stats, hp: target.stats.hp - damage } };
+                 let newPlayerField = [...newPlayer.field];
+                 let newPlayerGraveyard = [...newPlayer.graveyard];
+
+                 if (updatedTarget.stats.hp <= 0) {
+                     newPlayerGraveyard.push(updatedTarget);
+                     newPlayerField[playerTargetIndex] = null;
+                     const overflowDamage = Math.abs(updatedTarget.stats.hp);
+                     newPlayer.hp -= overflowDamage;
+                 } else {
+                     newPlayerField[playerTargetIndex] = updatedTarget;
+                 }
+                 newPlayer.field = newPlayerField;
+                 newPlayer.graveyard = newPlayerGraveyard;
+
+                 // Mark Opponent Attacker as hasAttacked
+                 newOpponent.field = newOpponent.field.map(c => 
+                     c?.instanceId === attacker.instanceId ? { ...c, hasAttacked: true } : c
+                 );
+             }
         }
-      
-        // Reset hasAttacked for the next turn and update attacker
-        const newPlayerField = player.field.map(c => 
-          c ? { ...c, hasAttacked: c.instanceId === attacker.instanceId ? true : c.hasAttacked } : c
-        );
       
         return {
           ...state,
-          player: {
-            ...player,
-            field: newPlayerField,
-          },
-          opponent: {
-            ...opponent,
-            hp: newOpponentHp,
-            field: newOpponentField,
-            graveyard: newOpponentGraveyard,
-          },
+          player: newPlayer,
+          opponent: newOpponent,
           selectedAttacker: undefined,
           selectedTarget: undefined,
         };

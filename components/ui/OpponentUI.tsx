@@ -1,4 +1,5 @@
 import { PlayerState } from '@/app/types/battle';
+import Image from 'next/image';
 
 interface OpponentUIProps {
   opponent: PlayerState;
@@ -8,7 +9,16 @@ export function OpponentUI({ opponent }: OpponentUIProps) {
   return (
     <div className="w-full bg-gray-900 p-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold">Opponent</h2>
+        <div className="flex items-center">
+            <Image 
+                src="/assets/opponent.png" 
+                alt="Opponent Avatar" 
+                width={50} 
+                height={50} 
+                className="rounded-full mr-4 border-2 border-red-500"
+            />
+            <h2 className="text-xl font-bold">Opponent</h2>
+        </div>
         <div className="text-lg">HP: {opponent.hp}</div>
       </div>
       <div className="flex mt-4">

@@ -1,5 +1,6 @@
 import { PlayerState } from '@/app/types/battle';
 import { Card } from '../Card';
+import Image from 'next/image';
 
 interface PlayerUIProps {
   player: PlayerState;
@@ -9,7 +10,16 @@ export function PlayerUI({ player }: PlayerUIProps) {
   return (
     <div className="w-full bg-gray-900 p-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold">Player</h2>
+        <div className="flex items-center">
+            <Image 
+                src="/assets/showcase.png" 
+                alt="Player Avatar" 
+                width={50} 
+                height={50} 
+                className="rounded-full mr-4 border-2 border-green-500"
+            />
+            <h2 className="text-xl font-bold">Player</h2>
+        </div>
         <div className="text-lg">HP: {player.hp}</div>
       </div>
       <div className="flex mt-4">
