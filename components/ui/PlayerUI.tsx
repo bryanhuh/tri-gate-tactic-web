@@ -1,12 +1,15 @@
 import { PlayerState } from '@/app/types/battle';
 import { Card } from '../Card';
 import Image from 'next/image';
+import { GameCharacter } from '@/types/game';
 
 interface PlayerUIProps {
   player: PlayerState;
+  onCardClick?: (card: GameCharacter) => void;
+  selectedCardId?: string;
 }
 
-export function PlayerUI({ player }: PlayerUIProps) {
+export function PlayerUI({ player, onCardClick, selectedCardId }: PlayerUIProps) {
   return (
     <div className="w-full bg-gray-900 p-4">
       <div className="flex justify-between items-center">
@@ -27,7 +30,12 @@ export function PlayerUI({ player }: PlayerUIProps) {
           <h3 className="font-bold">Hand</h3>
           <div className="flex space-x-2 overflow-x-auto">
             {player.hand.map(card => (
-              <Card key={card.instanceId} character={card} />
+              <Card 
+                key={card.instanceId} 
+                character={card} 
+                onClick={() => onCardClick?.(card)}
+                className={selectedCardId === card.instanceId ? "ring-4 ring-yellow-400" : ""}
+              />
             ))}
           </div>
         </div>

@@ -65,18 +65,33 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
     }
     case 'PLAY_CARD': {
       const { card, position } = action.payload;
-      const newHand = state.player.hand.filter(c => c.instanceId !== card.instanceId);
-      const newField = [...state.player.field];
-      newField[position] = card;
-
-      return {
-        ...state,
-        player: {
-          ...state.player,
-          hand: newHand,
-          field: newField,
-        },
-      };
+      const isPlayer = state.turn === 'player';
+      
+      if (isPlayer) {
+        const newHand = state.player.hand.filter(c => c.instanceId !== card.instanceId);
+        const newField = [...state.player.field];
+        newField[position] = card;
+        return {
+          ...state,
+          player: {
+            ...state.player,
+            hand: newHand,
+            field: newField,
+          },
+        };
+      } else {
+        const newHand = state.opponent.hand.filter(c => c.instanceId !== card.instanceId);
+        const newField = [...state.opponent.field];
+        newField[position] = card;
+        return {
+          ...state,
+          opponent: {
+            ...state.opponent,
+            hand: newHand,
+            field: newField,
+          },
+        };
+      }
     }
     case 'SELECT_ATTACKER': {
         return {

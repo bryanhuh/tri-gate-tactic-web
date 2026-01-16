@@ -7,6 +7,7 @@ import { OpponentUI } from './ui/OpponentUI';
 import { Card } from './Card';
 import { FieldSlot } from './FieldSlot';
 import { motion, AnimatePresence } from 'framer-motion';
+import { GameCharacter } from '@/types/game';
 
 interface BattleArenaProps {
   gameState: GameState;
@@ -17,6 +18,7 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
   const { player, opponent, selectedAttacker, turn, battleLog = [], turnCount = 1 } = gameState;
   const [showPlayerDeck, setShowPlayerDeck] = useState(false);
   const [isAutoMode, setIsAutoMode] = useState(false);
+  const [selectedHandCard, setSelectedHandCard] = useState<GameCharacter | null>(null);
   const logEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -27,6 +29,14 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
   useEffect(() => {
     if (turn === 'player' && isAutoMode) {
         const timer = setTimeout(() => {
+            // 1. Try to summon if there's an empty slot
+            const emptySlotIndex = player.field.findIndex(slot => slot === null);
+            if (emptySlotIndex !== -1 && player.hand.length > 0) {
+                actions.playCard(player.hand[0], emptySlotIndex);
+                return;
+            }
+
+            // 2. Attack logic
             const availableAttackers = player.field.filter(c => c && !c.hasAttacked);
             const availableTargets = opponent.field.filter(c => c !== null);
 
@@ -52,13 +62,20 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
         }, 2000);
         return () => clearTimeout(timer);
     }
-  }, [turn, isAutoMode, player.field, opponent.field, actions]);
+  }, [turn, isAutoMode, player.field, opponent.field, player.hand, actions]);
 
   // Opponent AI
   useEffect(() => {
     if (turn === 'opponent') {
       const timer = setTimeout(() => {
-        // AI Logic
+        // 1. Try to summon if there's an empty slot
+        const emptySlotIndex = opponent.field.findIndex(slot => slot === null);
+        if (emptySlotIndex !== -1 && opponent.hand.length > 0) {
+            actions.playCard(opponent.hand[0], emptySlotIndex);
+            return;
+        }
+
+        // AI Attack Logic
         const availableAttackers = opponent.field.filter(c => c && !c.hasAttacked);
         const availableTargets = player.field.filter(c => c !== null);
 
@@ -67,28 +84,11 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
             const target = availableTargets[Math.floor(Math.random() * availableTargets.length)];
             
             if (attacker && target) {
-                // We need to simulate the selection steps or just expose a direct attack action
-                // But the reducer expects SELECT_ATTACKER -> SELECT_TARGET -> ATTACK
-                // Or we can just dispatch them in sequence?
-                // The reducer logic:
-                // SELECT_ATTACKER sets selectedAttacker
-                // SELECT_TARGET sets selectedTarget
-                // ATTACK uses those.
-                
-                // However, the AI acts on behalf of the opponent. 
-                // The reducer might need to know WHO is acting, or we just trust the state.
-                // Current reducer checks "if (!selectedAttacker || !selectedTarget)"
-                
                 actions.selectAttacker(attacker);
                 setTimeout(() => {
                     actions.selectTarget(target);
                     setTimeout(() => {
                         actions.attack();
-                        // Check if turn should end? 
-                        // The player manually ends turn usually, but AI should end turn after attack?
-                        // If we only allow 1 attack per turn or multiple?
-                        // Assuming 1 attack for now or untill all attacked.
-                        // For simplicity, AI attacks once then ends turn.
                         setTimeout(() => {
                             actions.endTurn();
                         }, 1000);
@@ -96,14 +96,13 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
                 }, 500);
             }
         } else {
-            // No attacks possible
-             actions.endTurn();
+            actions.endTurn();
         }
       }, 2000);
 
       return () => clearTimeout(timer);
     }
-  }, [turn, opponent.field, player.field, actions]);
+  }, [turn, opponent.field, player.field, opponent.hand, actions]);
 
   const handleCardClick = (card: any) => {
     if (isAutoMode) return;
@@ -111,18 +110,28 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
     if (gameState.turn === 'player') {
       if (player.field.includes(card) && !card.hasAttacked) {
         actions.selectAttacker(card);
+        setSelectedHandCard(null); // Clear hand selection if choosing attacker
       } else if (opponent.field.includes(card) && selectedAttacker) {
         actions.selectTarget(card);
         actions.attack();
-        // Optional: Auto end turn after attack? Or let user button do it?
-        // Let's add an End Turn button.
       }
     }
   };
 
+  const handleHandCardClick = (card: GameCharacter) => {
+    if (isAutoMode) return;
+    if (gameState.turn === 'player') {
+        setSelectedHandCard(selectedHandCard?.instanceId === card.instanceId ? null : card);
+        actions.selectAttacker(undefined as any); // Clear attacker selection if choosing hand card
+    }
+  };
+
   const handleFieldSlotClick = (position: number) => {
-    // Implement logic to play a card from hand to this slot
-    // For now, if we have a card selected in hand... (Logic not fully present in current useBattle)
+    if (isAutoMode) return;
+    if (gameState.turn === 'player' && selectedHandCard) {
+        actions.playCard(selectedHandCard, position);
+        setSelectedHandCard(null);
+    }
   };
 
   return (
@@ -187,7 +196,11 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
       </div>
 
       <div className="w-full z-10 bg-gray-800/80 backdrop-blur-sm border-t border-gray-700 relative">
-          <PlayerUI player={player} />
+          <PlayerUI 
+            player={player} 
+            onCardClick={handleHandCardClick}
+            selectedCardId={selectedHandCard?.instanceId}
+          />
           
           <div className="absolute bottom-4 right-4 flex gap-2">
              <button 
