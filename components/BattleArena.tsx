@@ -9,6 +9,7 @@ import { FieldSlot } from './FieldSlot';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GameCharacter } from '@/types/game';
 import Image from 'next/image';
+import { Play, RotateCcw } from 'lucide-react';
 
 interface BattleArenaProps {
   gameState: GameState;
@@ -140,7 +141,7 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
       const winner = playerLost ? 'Opponent' : 'Player';
       const winnerAvatar = playerLost ? '/assets/opponent.png' : '/assets/showcase.png';
       const winnerCards = playerLost ? opponent.field : player.field;
-      const resultImage = playerLost ? '/assets/lose.png' : '/assets/win.png';
+      const resultImage = playerLost ? '/assets/defeat.jpeg' : '/assets/victory.jpeg';
 
       // Animation start positions
       const initialAvatarPos = playerLost 
@@ -149,21 +150,24 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
 
       return (
           <div className="flex flex-col items-center justify-center w-full h-screen bg-gray-900 text-white overflow-hidden relative z-50">
-              <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-0"></div>
+              {/* Dynamic Background */}
+              <div className={`absolute inset-0 bg-gradient-to-br ${playerLost ? 'from-red-900/90 via-black to-black' : 'from-yellow-600/80 via-black to-blue-900/80'} backdrop-blur-md z-0`}></div>
               
-              <div className="z-10 flex flex-col items-center gap-8">
+              <div className="z-10 flex flex-col items-center gap-8 w-full max-w-4xl">
                   <motion.div
-                      initial={{ scale: 0, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ duration: 0.5, delay: 0.2 }}
+                      initial={{ scale: 0, opacity: 0, y: -50 }}
+                      animate={{ scale: 1, opacity: 1, y: 0 }}
+                      transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                      className="relative"
                   >
                       <Image 
                           src={resultImage} 
-                          alt={playerLost ? "You Lose" : "You Win"} 
-                          width={400} 
-                          height={200}
-                          className="object-contain"
+                          alt={playerLost ? "Defeat" : "Victory"} 
+                          width={600} 
+                          height={300}
+                          className="object-contain rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.8)] border-4 border-white/10"
                       />
+                      <div className="absolute inset-0 rounded-2xl shadow-inner pointer-events-none"></div>
                   </motion.div>
 
                   <div className="relative w-full h-64 flex items-center justify-center">
@@ -171,38 +175,39 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
                           className="absolute z-20"
                           initial={initialAvatarPos as any}
                           animate={{ top: '50%', left: '50%', x: '-50%', y: '-50%', scale: 1.5, bottom: 'auto' }}
-                          transition={{ duration: 1, ease: "easeInOut" }}
+                          transition={{ duration: 1.2, ease: [0.34, 1.56, 0.64, 1] }}
                       >
                           <Image 
                               src={winnerAvatar} 
                               alt="Winner Avatar" 
                               width={100} 
                               height={100} 
-                              className={`rounded-full border-4 ${playerLost ? 'border-red-500' : 'border-green-500'} object-cover h-[100px] w-[100px]`}
+                              className={`rounded-full border-4 ${playerLost ? 'border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.6)]' : 'border-yellow-400 shadow-[0_0_30px_rgba(250,204,21,0.6)]'} object-cover h-[100px] w-[100px]`}
                           />
                       </motion.div>
                       
                       {/* Winner's Cards animating in */}
-                      <div className="flex gap-4 items-center justify-center absolute top-32">
+                      <div className="flex gap-6 items-center justify-center absolute top-28 w-full">
                           {winnerCards.map((card, index) => card ? (
                               <motion.div
                                   key={card.instanceId}
-                                  initial={{ opacity: 0, y: 50 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  transition={{ delay: 1 + (index * 0.2) }}
+                                  initial={{ opacity: 0, y: 100, rotate: -10 }}
+                                  animate={{ opacity: 1, y: 0, rotate: 0 }}
+                                  transition={{ delay: 0.8 + (index * 0.15), type: "spring" }}
                               >
-                                  <Card character={card} className="scale-75" />
+                                  <Card character={card} className={`scale-75 shadow-xl ${playerLost ? 'border-red-500/50' : 'border-yellow-400/50'}`} />
                               </motion.div>
                           ) : null)}
                       </div>
                   </div>
 
                   <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
+                      whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(255,255,255,0.3)" }}
+                      whileTap={{ scale: 0.95 }}
                       onClick={() => window.location.reload()}
-                      className="mt-12 px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full font-bold text-xl shadow-lg hover:shadow-blue-500/50"
+                      className={`mt-16 px-10 py-4 rounded-full font-bold text-2xl shadow-lg flex items-center gap-3 transition-colors ${playerLost ? 'bg-red-600 hover:bg-red-500' : 'bg-yellow-500 hover:bg-yellow-400 text-black'}`}
                   >
+                      <RotateCcw size={24} />
                       Play Again
                   </motion.button>
               </div>
