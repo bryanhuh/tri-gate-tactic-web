@@ -22,11 +22,15 @@ export default function HeroSection({ onPlayNow }: HeroSectionProps) {
     <section className="relative w-full min-h-screen flex flex-col justify-center overflow-hidden shadow-2xl bg-indigo-950">
       <audio ref={audioRef} src="/assets/background.mp3" />
       <div className="absolute inset-0 opacity-60">
-        <img 
-          src="/assets/cards.png" 
-          alt="Showcase" 
-          className="w-full h-full object-cover object-top"
-        />
+        <video 
+          autoPlay 
+          loop 
+          muted 
+          playsInline
+          className="w-full h-full object-cover object-center"
+        >
+          <source src="/assets/video.mp4" type="video/mp4" />
+        </video>
         <div className="absolute inset-0 bg-gradient-to-t from-indigo-950 via-transparent to-transparent" />
       </div>
 
@@ -52,9 +56,9 @@ export default function HeroSection({ onPlayNow }: HeroSectionProps) {
         </div>
       </div>
 
-      <div className="absolute bottom-[-80px] right-[-25px] w-64 h-128 rotate-[-10deg] opacity-80 hidden lg:block">
+      {/* <div className="absolute bottom-[-80px] right-[-25px] w-64 h-128 rotate-[-10deg] opacity-80 hidden lg:block">
         <img src="/assets/showcase.png" alt="Cards preview" className="rounded-2xl shadow-2xl border-2 border-white/20" />
-      </div>
+      </div> */}
     </section>
   );
 }
