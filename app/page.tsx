@@ -36,7 +36,7 @@ export default function Home() {
     return <OpponentReveal opponentDeck={state.opponent.deck} onComplete={handleRevealComplete} />;
   }
 
-  if (state.phase === 'battle') {
+  if (state.phase === 'battle' || state.phase === 'game-over') {
     return <BattleArena gameState={state} actions={actions} />;
   }
 

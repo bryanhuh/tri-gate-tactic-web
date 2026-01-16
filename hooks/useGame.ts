@@ -120,6 +120,7 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
         let newPlayer = { ...player };
         let newOpponent = { ...opponent };
         let logMessage = '';
+        let phase = state.phase;
 
         // Check if target is in opponent's field (Player Attacking)
         const opponentTargetIndex = newOpponent.field.findIndex(c => c?.instanceId === target.instanceId);
@@ -150,6 +151,7 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
 
              if (newOpponent.hp <= 0) {
                  logMessage += " Player wins the battle!";
+                 phase = 'game-over';
              }
 
         } else {
@@ -182,12 +184,28 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
 
                  if (newPlayer.hp <= 0) {
                      logMessage += " You lost the battle!";
+                     phase = 'game-over';
                  }
              }
+        }
+
+        // Check for Card Wipeout (No cards on field AND empty hand)
+        if (phase !== 'game-over') {
+            const playerHasCards = newPlayer.field.some(c => c !== null) || newPlayer.hand.length > 0;
+            const opponentHasCards = newOpponent.field.some(c => c !== null) || newOpponent.hand.length > 0;
+
+            if (!playerHasCards) {
+                logMessage += " You ran out of combatants! You Lost!";
+                phase = 'game-over';
+            } else if (!opponentHasCards) {
+                logMessage += " Opponent ran out of combatants! You Win!";
+                phase = 'game-over';
+            }
         }
       
         return {
           ...state,
+          phase,
           player: newPlayer,
           opponent: newOpponent,
           selectedAttacker: undefined,

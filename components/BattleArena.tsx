@@ -8,6 +8,7 @@ import { Card } from './Card';
 import { FieldSlot } from './FieldSlot';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GameCharacter } from '@/types/game';
+import Image from 'next/image';
 
 interface BattleArenaProps {
   gameState: GameState;
@@ -27,7 +28,7 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
 
   // Player Auto Mode AI
   useEffect(() => {
-    if (turn === 'player' && isAutoMode) {
+    if (turn === 'player' && isAutoMode && gameState.phase !== 'game-over') {
         const timer = setTimeout(() => {
             // 1. Try to summon if there's an empty slot
             const emptySlotIndex = player.field.findIndex(slot => slot === null);
@@ -62,11 +63,11 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
         }, 2000);
         return () => clearTimeout(timer);
     }
-  }, [turn, isAutoMode, player.field, opponent.field, player.hand, actions]);
+  }, [turn, isAutoMode, player.field, opponent.field, player.hand, actions, gameState.phase]);
 
   // Opponent AI
   useEffect(() => {
-    if (turn === 'opponent') {
+    if (turn === 'opponent' && gameState.phase !== 'game-over') {
       const timer = setTimeout(() => {
         // 1. Try to summon if there's an empty slot
         const emptySlotIndex = opponent.field.findIndex(slot => slot === null);
@@ -102,10 +103,10 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
 
       return () => clearTimeout(timer);
     }
-  }, [turn, opponent.field, player.field, opponent.hand, actions]);
+  }, [turn, opponent.field, player.field, opponent.hand, actions, gameState.phase]);
 
   const handleCardClick = (card: any) => {
-    if (isAutoMode) return;
+    if (isAutoMode || gameState.phase === 'game-over') return;
     
     if (gameState.turn === 'player') {
       if (player.field.includes(card) && !card.hasAttacked) {
@@ -119,7 +120,7 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
   };
 
   const handleHandCardClick = (card: GameCharacter) => {
-    if (isAutoMode) return;
+    if (isAutoMode || gameState.phase === 'game-over') return;
     if (gameState.turn === 'player') {
         setSelectedHandCard(selectedHandCard?.instanceId === card.instanceId ? null : card);
         actions.selectAttacker(undefined as any); // Clear attacker selection if choosing hand card
@@ -127,12 +128,87 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
   };
 
   const handleFieldSlotClick = (position: number) => {
-    if (isAutoMode) return;
+    if (isAutoMode || gameState.phase === 'game-over') return;
     if (gameState.turn === 'player' && selectedHandCard) {
         actions.playCard(selectedHandCard, position);
         setSelectedHandCard(null);
     }
   };
+
+  if (gameState.phase === 'game-over') {
+      const playerLost = player.hp <= 0 || (player.field.every(c => c === null) && player.hand.length === 0);
+      const winner = playerLost ? 'Opponent' : 'Player';
+      const winnerAvatar = playerLost ? '/assets/opponent.png' : '/assets/showcase.png';
+      const winnerCards = playerLost ? opponent.field : player.field;
+      const resultImage = playerLost ? '/assets/lose.png' : '/assets/win.png';
+
+      // Animation start positions
+      const initialAvatarPos = playerLost 
+          ? { top: '10%', left: '10%', scale: 0.5 } 
+          : { bottom: '10%', left: '10%', scale: 0.5 };
+
+      return (
+          <div className="flex flex-col items-center justify-center w-full h-screen bg-gray-900 text-white overflow-hidden relative z-50">
+              <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-0"></div>
+              
+              <div className="z-10 flex flex-col items-center gap-8">
+                  <motion.div
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ duration: 0.5, delay: 0.2 }}
+                  >
+                      <Image 
+                          src={resultImage} 
+                          alt={playerLost ? "You Lose" : "You Win"} 
+                          width={400} 
+                          height={200}
+                          className="object-contain"
+                      />
+                  </motion.div>
+
+                  <div className="relative w-full h-64 flex items-center justify-center">
+                      <motion.div
+                          className="absolute z-20"
+                          initial={initialAvatarPos as any}
+                          animate={{ top: '50%', left: '50%', x: '-50%', y: '-50%', scale: 1.5, bottom: 'auto' }}
+                          transition={{ duration: 1, ease: "easeInOut" }}
+                      >
+                          <Image 
+                              src={winnerAvatar} 
+                              alt="Winner Avatar" 
+                              width={100} 
+                              height={100} 
+                              className={`rounded-full border-4 ${playerLost ? 'border-red-500' : 'border-green-500'} object-cover h-[100px] w-[100px]`}
+                          />
+                      </motion.div>
+                      
+                      {/* Winner's Cards animating in */}
+                      <div className="flex gap-4 items-center justify-center absolute top-32">
+                          {winnerCards.map((card, index) => card ? (
+                              <motion.div
+                                  key={card.instanceId}
+                                  initial={{ opacity: 0, y: 50 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ delay: 1 + (index * 0.2) }}
+                              >
+                                  <Card character={card} className="scale-75" />
+                              </motion.div>
+                          ) : null)}
+                      </div>
+                  </div>
+
+                  <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => window.location.reload()}
+                      className="mt-12 px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full font-bold text-xl shadow-lg hover:shadow-blue-500/50"
+                  >
+                      Play Again
+                  </motion.button>
+              </div>
+          </div>
+      );
+  }
 
   return (
     <div className="flex flex-col items-center justify-between w-full h-screen bg-gray-900 text-white overflow-hidden relative">
