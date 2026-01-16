@@ -1,5 +1,6 @@
 "use client";
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Volume2, VolumeX } from 'lucide-react';
 
 type HeroSectionProps = {
   onPlayNow: () => void;
@@ -7,10 +8,13 @@ type HeroSectionProps = {
 
 export default function HeroSection({ onPlayNow }: HeroSectionProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isMuted, setIsMuted] = useState(true);
 
   const handlePlayNowClick = () => {
+    // If we have a background audio element (for non-video cases), play it
     if (audioRef.current) {
-      audioRef.current.volume = 0.5; // Set volume programmatically
+      audioRef.current.volume = 0.5;
       audioRef.current.play().catch(error => {
         console.log("Audio playback initiated by user click, but still prevented:", error);
       });
@@ -18,14 +22,22 @@ export default function HeroSection({ onPlayNow }: HeroSectionProps) {
     onPlayNow();
   };
 
+  const toggleMute = () => {
+    setIsMuted(!isMuted);
+    if (videoRef.current) {
+      videoRef.current.muted = !isMuted;
+    }
+  };
+
   return (
     <section className="relative w-full min-h-screen flex flex-col justify-center overflow-hidden shadow-2xl bg-indigo-950">
       <audio ref={audioRef} src="/assets/background.mp3" />
       <div className="absolute inset-0 opacity-60">
         <video 
+          ref={videoRef}
           autoPlay 
           loop 
-          muted 
+          muted={isMuted}
           playsInline
           className="w-full h-full object-cover object-center"
         >
@@ -56,9 +68,14 @@ export default function HeroSection({ onPlayNow }: HeroSectionProps) {
         </div>
       </div>
 
-      {/* <div className="absolute bottom-[-80px] right-[-25px] w-64 h-128 rotate-[-10deg] opacity-80 hidden lg:block">
-        <img src="/assets/showcase.png" alt="Cards preview" className="rounded-2xl shadow-2xl border-2 border-white/20" />
-      </div> */}
+      {/* Mute Toggle Control */}
+      <button 
+        onClick={toggleMute}
+        className="absolute bottom-8 right-8 z-20 p-3 bg-black/50 backdrop-blur-md border border-white/20 rounded-full text-white hover:bg-white/20 transition-all hover:scale-110"
+        aria-label={isMuted ? "Unmute Video" : "Mute Video"}
+      >
+        {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
+      </button>
     </section>
   );
 }
