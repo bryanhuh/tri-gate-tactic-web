@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { GameCharacter } from '@/types/game';
 import { getRandomCharacter } from '@/lib/anilist-service';
 import { Card } from './Card';
@@ -17,6 +17,37 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
   const [flipped, setFlipped] = useState<boolean[]>(Array(5).fill(false));
   const [isFetchingDeck, setIsFetchingDeck] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
+  const [savedTeam, setSavedTeam] = useState<GameCharacter[] | null>(null);
+
+  // Load saved team on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('anime-battle-saved-team');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length === 5) {
+          // eslint-disable-next-line
+          setSavedTeam(parsed);
+        }
+      } catch (e) {
+        console.error("Failed to parse saved team", e);
+      }
+    }
+  }, []);
+
+  // Save team when all characters are selected
+  useEffect(() => {
+    if (characters.every(c => c !== null)) {
+      localStorage.setItem('anime-battle-saved-team', JSON.stringify(characters));
+    }
+  }, [characters]);
+
+  const handleUseSavedTeam = () => {
+    if (savedTeam) {
+      setCharacters(savedTeam);
+      setFlipped(Array(5).fill(true));
+    }
+  };
 
   const handleCardClick = async (index: number) => {
     if (characters[index] || loading[index]) return;
@@ -76,14 +107,29 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
 
   const allCharactersSelected = characters.every(c => c !== null);
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    show: { y: 0, opacity: 1 }
+  };
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen relative">
+    <div className="flex flex-col items-center justify-center min-h-screen relative overflow-hidden">
       
       {/* Info Button */}
       <div className="absolute top-4 right-4 z-50">
         <button 
             onClick={() => setShowInfo(!showInfo)}
-            className="w-10 h-10 rounded-full bg-gray-800 border border-gray-600 text-white font-bold hover:bg-gray-700 flex items-center justify-center"
+            className="w-10 h-10 rounded-full bg-gray-800 border border-gray-600 text-white font-bold hover:bg-gray-700 flex items-center justify-center transition-transform hover:scale-110"
         >
             ?
         </button>
@@ -142,32 +188,84 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
         )}
       </AnimatePresence>
 
-      <div className="text-center">
-        <h2 className="text-4xl font-extrabold mb-2 text-white">ASSEMBLE YOUR TEAM</h2>
-        <p className="text-lg text-gray-400 mb-8">Select 5 cards to reveal your champions.</p>
-      </div>
-      <div className="flex justify-center gap-4 mb-8 flex-wrap">
+      <motion.div 
+        className="text-center z-10"
+        initial={{ opacity: 0, y: -30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <h2 className="text-5xl font-extrabold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 drop-shadow-sm">
+          ASSEMBLE YOUR TEAM
+        </h2>
+        <p className="text-lg text-gray-400 mb-8 tracking-wide">Select 5 cards to reveal your champions.</p>
+        
+        <AnimatePresence>
+          {savedTeam && characters.every(c => c === null) && (
+             <motion.button
+               initial={{ opacity: 0, scale: 0.8 }}
+               animate={{ opacity: 1, scale: 1 }}
+               exit={{ opacity: 0, scale: 0.8 }}
+               whileHover={{ scale: 1.05 }}
+               whileTap={{ scale: 0.95 }}
+               onClick={handleUseSavedTeam}
+               className="mb-8 px-6 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold rounded-full shadow-lg border border-indigo-400/30 hover:shadow-indigo-500/50 transition-all"
+             >
+               ↺ Reuse Previous Team
+             </motion.button>
+          )}
+        </AnimatePresence>
+      </motion.div>
+
+      <motion.div 
+        className="flex justify-center gap-6 mb-12 flex-wrap z-10"
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+      >
         {characters.map((character, index) => (
-          <div key={index} className={`flip-card ${!flipped[index] ? 'glow' : ''}`} onClick={() => handleCardClick(index)}>
+          <motion.div 
+            key={index} 
+            className={`flip-card ${!flipped[index] ? 'glow' : ''}`} 
+            onClick={() => handleCardClick(index)}
+            variants={itemVariants}
+            whileHover={{ scale: 1.05 }}
+          >
             <div className={`flip-card-inner ${flipped[index] ? 'flipped' : ''}`}>
-              <div className="flip-card-front">
+              <div className="flip-card-front shadow-xl shadow-blue-900/20">
                 <img src="/assets/card.png" alt="Card back" className="w-48 h-64 object-cover rounded-lg" />
               </div>
-              <div className="flip-card-back">
+              <div className="flip-card-back shadow-xl shadow-purple-900/20">
                 {loading[index] && <Spinner />}
                 {character && <Card character={character} />}
               </div>
             </div>
-          </div>
+          </motion.div>
         ))}
-      </div>
-      <button
-        onClick={handleStartBattle}
-        disabled={!allCharactersSelected || isFetchingDeck}
-        className="px-8 py-4 bg-green-600 text-white font-bold rounded-lg shadow-lg hover:bg-green-700 transition-all duration-300 disabled:bg-gray-600 disabled:cursor-not-allowed disabled:shadow-none transform hover:scale-105"
+      </motion.div>
+      
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
       >
-        {isFetchingDeck ? <Spinner /> : 'Start Battle'}
-      </button>
+        <button
+          onClick={handleStartBattle}
+          disabled={!allCharactersSelected || isFetchingDeck}
+          className={`px-10 py-4 font-bold rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 ${
+            !allCharactersSelected || isFetchingDeck
+              ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+              : 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-green-500/30 hover:shadow-green-500/50'
+          }`}
+        >
+          {isFetchingDeck ? (
+             <div className="flex items-center gap-2">
+               <Spinner /> <span>Preparing Battle...</span>
+             </div>
+          ) : (
+             'START BATTLE'
+          )}
+        </button>
+      </motion.div>
     </div>
   );
 };
