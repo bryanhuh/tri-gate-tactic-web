@@ -22,6 +22,9 @@ export function PlayerUI({ player, onCardClick, selectedCardId, canSwap }: Playe
   const xOffsetStep = 45; // Overlap amount
   const baseX = 0; 
 
+  const hasEmptySlot = player.field.some(slot => slot === null);
+  const showReadyToSummon = canSwap || hasEmptySlot;
+
   return (
     <div className="w-full h-full flex flex-col justify-end pb-4 pointer-events-none">
       
@@ -112,18 +115,29 @@ export function PlayerUI({ player, onCardClick, selectedCardId, canSwap }: Playe
                                     : "shadow-black grayscale-[0.2] contrast-[0.9]" // Slightly muted look for reserve
                                 } ${isHovered ? "grayscale-0 contrast-100" : ""}`}
                             />
-                            {/* Reserve Label (Optional, shown on hover or subtly) */}
+                            
+                            {/* Reserve Labels */}
                             {isHovered && (
-                                <motion.div 
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    className={`absolute -top-8 left-0 right-0 text-center text-[10px] font-bold uppercase tracking-widest py-1 rounded border 
-                                        ${canSwap 
-                                            ? "text-blue-400 bg-blue-900/80 border-blue-400/50 shadow-[0_0_10px_rgba(59,130,246,0.5)]" 
-                                            : "text-yellow-400 bg-black/80 border-yellow-400/50"}`}
-                                >
-                                    {canSwap ? "Swap Available" : "Ready to Summon"}
-                                </motion.div>
+                                <div className="absolute -top-16 left-0 right-0 flex flex-col gap-1 items-center pointer-events-none">
+                                    {canSwap && (
+                                        <motion.div 
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            className="w-full text-center text-[10px] font-bold uppercase tracking-widest py-1 rounded border text-blue-400 bg-blue-900/80 border-blue-400/50 shadow-[0_0_10px_rgba(59,130,246,0.5)]"
+                                        >
+                                            Swap Available
+                                        </motion.div>
+                                    )}
+                                    {showReadyToSummon && (
+                                        <motion.div 
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            className="w-full text-center text-[10px] font-bold uppercase tracking-widest py-1 rounded border text-yellow-400 bg-black/80 border-yellow-400/50"
+                                        >
+                                            Ready to Summon
+                                        </motion.div>
+                                    )}
+                                </div>
                             )}
                         </motion.div>
                     );
