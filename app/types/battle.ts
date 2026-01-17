@@ -10,6 +10,7 @@ export interface PlayerState {
   deck: GameCharacter[];
   graveyard: GameCharacter[];
   lastSwapTurn: number;
+  wildcardUsed: boolean;
 }
 
 export interface GameState {
@@ -21,6 +22,7 @@ export interface GameState {
   selectedAttacker?: GameCharacter;
   selectedTarget?: GameCharacter;
   battleLog: string[];
+  wildcardAlert: string | null; // Stores the name of who used it, or null
 }
 
 export type BattleAction =
@@ -28,6 +30,8 @@ export type BattleAction =
   | { type: 'START_BATTLE' }
   | { type: 'PLAY_CARD'; payload: { card: GameCharacter; position: number } }
   | { type: 'SWAP_CARDS'; payload: { handCard: GameCharacter; fieldPosition: number } }
+  | { type: 'DRAW_WILDCARD' }
+  | { type: 'CLEAR_WILDCARD_ALERT' }
   | { type: 'SELECT_ATTACKER'; payload: { attacker: GameCharacter } }
   | { type: 'SELECT_TARGET'; payload: { target: GameCharacter } }
   | { type: 'ATTACK' }

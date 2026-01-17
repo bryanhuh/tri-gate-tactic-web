@@ -1,5 +1,6 @@
 import { GameState, BattleAction } from '@/app/types/battle';
 import { GameCharacter } from '@/types/game';
+import { v4 as uuidv4 } from 'uuid';
 
 export const initialState: GameState = {
   phase: 'character-selection',
@@ -12,6 +13,7 @@ export const initialState: GameState = {
     deck: [],
     graveyard: [],
     lastSwapTurn: 0,
+    wildcardUsed: false,
   },
   opponent: {
     hp: 1000,
@@ -20,9 +22,29 @@ export const initialState: GameState = {
     deck: [],
     graveyard: [],
     lastSwapTurn: 0,
+    wildcardUsed: false,
   },
   battleLog: [],
+  wildcardAlert: null,
 };
+
+// Expanded pool of balanced characters for wildcard
+const WILDCARD_POOL: GameCharacter[] = [
+    { id: 9001, instanceId: 'wc', name: "Spirit Fox", image: "https://s4.anilist.co/file/anilistcdn/character/large/b40-q0Kn048NuC50.png", tier: 'A', stats: { hp: 220, power: 180, defense: 140, speed: 110, skill: 80 } },
+    { id: 9002, instanceId: 'wc', name: "Iron Golem", image: "https://s4.anilist.co/file/anilistcdn/character/large/b17-6EfaK450621B.png", tier: 'B+', stats: { hp: 300, power: 150, defense: 200, speed: 40, skill: 50 } },
+    { id: 9003, instanceId: 'wc', name: "Wind Blade", image: "https://s4.anilist.co/file/anilistcdn/character/large/b86-d86.png", tier: 'A-', stats: { hp: 180, power: 210, defense: 100, speed: 120, skill: 90 } },
+    { id: 9004, instanceId: 'wc', name: "Shadow Rogue", image: "https://s4.anilist.co/file/anilistcdn/character/large/b85-d85.png", tier: 'B', stats: { hp: 160, power: 190, defense: 90, speed: 130, skill: 100 } },
+    { id: 9005, instanceId: 'wc', name: "Battle Mage", image: "https://s4.anilist.co/file/anilistcdn/character/large/b24-d24.png", tier: 'A', stats: { hp: 200, power: 200, defense: 120, speed: 80, skill: 110 } },
+];
+
+function generateWildcards(): GameCharacter[] {
+    // Pick 2 random unique cards from the pool
+    const shuffled = [...WILDCARD_POOL].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, 2).map(c => ({
+        ...c,
+        instanceId: uuidv4(),
+    }));
+}
 
 export function gameReducer(state: GameState, action: BattleAction): GameState {
   switch (action.type) {
@@ -30,7 +52,7 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
       const { playerDeck, opponentDeck } = action.payload;
       
       const playerField = [playerDeck[0], playerDeck[1], playerDeck[2]];
-      const playerHand = playerDeck.slice(3, 5); // Assuming 5 cards total selected, so 2 in hand
+      const playerHand = playerDeck.slice(3, 5);
       
       const opponentField = [opponentDeck[0], opponentDeck[1], opponentDeck[2]];
       const opponentHand = opponentDeck.slice(3, 5);
@@ -136,8 +158,47 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
                 battleLog: [...state.battleLog, `Player swapped ${handCard.name} with ${fieldCard?.name || 'Empty Slot'}!`],
             };
         } else {
-             // Opponent logic (can be expanded similarly if needed)
+             // Opponent logic
              return state;
+        }
+    }
+    case 'DRAW_WILDCARD': {
+        const isPlayer = state.turn === 'player';
+        const user = isPlayer ? 'Player' : 'Opponent';
+        
+        if (isPlayer && state.player.wildcardUsed) return state;
+        if (!isPlayer && state.opponent.wildcardUsed) return state;
+
+        const wildcards = generateWildcards();
+        
+        if (isPlayer) {
+            return {
+                ...state,
+                player: {
+                    ...state.player,
+                    hand: [...state.player.hand, ...wildcards],
+                    wildcardUsed: true,
+                },
+                wildcardAlert: "PLAYER",
+                battleLog: [...state.battleLog, "A desperate prayer is answered! Two Heroes join your hand!"],
+            };
+        } else {
+             return {
+                ...state,
+                opponent: {
+                    ...state.opponent,
+                    hand: [...state.opponent.hand, ...wildcards],
+                    wildcardUsed: true,
+                },
+                wildcardAlert: "OPPONENT",
+                battleLog: [...state.battleLog, "The Opponent calls for reinforcements! New challengers approach!"],
+            };
+        }
+    }
+    case 'CLEAR_WILDCARD_ALERT': {
+        return {
+            ...state,
+            wildcardAlert: null,
         }
     }
     case 'SELECT_ATTACKER': {
@@ -242,11 +303,19 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
             const opponentHasCards = newOpponent.field.some(c => c !== null) || newOpponent.hand.length > 0;
 
             if (!playerHasCards) {
-                logMessage += " You ran out of combatants! You Lost!";
-                phase = 'game-over';
+                if (!newPlayer.wildcardUsed) {
+                    logMessage += " You have no combatants left! Draw your Wildcard or accept defeat!";
+                } else {
+                    logMessage += " You ran out of combatants! You Lost!";
+                    phase = 'game-over';
+                }
             } else if (!opponentHasCards) {
-                logMessage += " Opponent ran out of combatants! You Win!";
-                phase = 'game-over';
+                if (!newOpponent.wildcardUsed) {
+                     logMessage += " Opponent is cornered! They are drawing their Wildcard!";
+                } else {
+                    logMessage += " Opponent ran out of combatants! You Win!";
+                    phase = 'game-over';
+                }
             }
         }
       
@@ -262,7 +331,6 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
       }
       
     case 'END_TURN': {
-      // Reset attack status for all characters on the field
       const newPlayerField = state.player.field.map(c => c ? { ...c, hasAttacked: false } : null);
       const newOpponentField = state.opponent.field.map(c => c ? { ...c, hasAttacked: false } : null);
       

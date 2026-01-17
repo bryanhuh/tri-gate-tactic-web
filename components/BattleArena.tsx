@@ -9,11 +9,13 @@ import { FieldSlot } from './FieldSlot';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GameCharacter } from '@/types/game';
 import Image from 'next/image';
-import { RotateCcw, Volume2, VolumeX, Trophy, Skull, Sword, Shield } from 'lucide-react';
+import { RotateCcw, Volume2, VolumeX, Trophy, Skull, Sword, Shield, Sparkles, AlertTriangle } from 'lucide-react';
 
 interface BattleActions {
   playCard: (card: GameCharacter, position: number) => void;
   swapCard: (handCard: GameCharacter, fieldPosition: number) => void;
+  drawWildcard: () => void;
+  clearWildcardAlert: () => void;
   selectAttacker: (card: GameCharacter | undefined) => void;
   selectTarget: (card: GameCharacter) => void;
   attack: () => void;
@@ -37,6 +39,10 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
 
   // Check if Swap is available
   const canSwap = turnCount >= 3 && (turnCount - player.lastSwapTurn) >= 3;
+
+  // Check if Wildcard Draw is available (1 or fewer active cards) for Player
+  const activeCardsCount = player.hand.length + player.field.filter(c => c !== null).length;
+  const canDrawWildcard = !player.wildcardUsed && activeCardsCount <= 1 && turn === 'player';
 
   useEffect(() => {
     logEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -64,6 +70,16 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
       }
   }, [gameState.phase, gameState.turn]);
 
+  // Wildcard Alert Effect
+  useEffect(() => {
+      if (gameState.wildcardAlert) {
+          const timer = setTimeout(() => {
+              actions.clearWildcardAlert();
+          }, 3000); // Show alert for 3 seconds
+          return () => clearTimeout(timer);
+      }
+  }, [gameState.wildcardAlert, actions]);
+
 
   // Music Control
   useEffect(() => {
@@ -78,6 +94,13 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
   useEffect(() => {
     if (turn === 'player' && isAutoMode && gameState.phase !== 'game-over') {
         const timer = setTimeout(() => {
+            // Check for Wildcard logic in Auto Mode (Desperation move)
+            const playerActiveCount = player.hand.length + player.field.filter(c => c).length;
+            if (playerActiveCount <= 1 && !player.wildcardUsed) {
+                actions.drawWildcard();
+                return;
+            }
+
             // 1. Try to summon if there's an empty slot
             const emptySlotIndex = player.field.findIndex(slot => slot === null);
             if (emptySlotIndex !== -1 && player.hand.length > 0) {
@@ -111,12 +134,19 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
         }, 2000);
         return () => clearTimeout(timer);
     }
-  }, [turn, isAutoMode, player.field, opponent.field, player.hand, actions, gameState.phase]);
+  }, [turn, isAutoMode, player.field, opponent.field, player.hand, actions, gameState.phase, player.wildcardUsed]);
 
   // Opponent AI
   useEffect(() => {
     if (turn === 'opponent' && gameState.phase !== 'game-over') {
       const timer = setTimeout(() => {
+        // AI Wildcard Logic
+        const opponentActiveCount = opponent.hand.length + opponent.field.filter(c => c).length;
+        if (opponentActiveCount <= 1 && !opponent.wildcardUsed) {
+            actions.drawWildcard();
+            return; 
+        }
+
         // 1. Try to summon if there's an empty slot
         const emptySlotIndex = opponent.field.findIndex(slot => slot === null);
         if (emptySlotIndex !== -1 && opponent.hand.length > 0) {
@@ -151,7 +181,7 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
 
       return () => clearTimeout(timer);
     }
-  }, [turn, opponent.field, player.field, opponent.hand, actions, gameState.phase]);
+  }, [turn, opponent.field, player.field, opponent.hand, actions, gameState.phase, opponent.wildcardUsed]);
 
   const handleCardClick = (card: GameCharacter) => {
     if (isAutoMode || gameState.phase === 'game-over') return;
@@ -264,6 +294,42 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
           </div>
       </div>
 
+      {/* Wildcard Button (Player Only) */}
+      <AnimatePresence>
+        {canDrawWildcard && (
+            <motion.div 
+                initial={{ opacity: 0, scale: 0.8, x: -100 }}
+                animate={{ opacity: 1, scale: 1, x: 0 }}
+                exit={{ opacity: 0, scale: 0.5, x: -100 }}
+                className="absolute left-8 top-1/2 transform -translate-y-1/2 z-50 flex flex-col items-center gap-4 pointer-events-auto"
+            >
+                <div className="relative">
+                    <motion.div 
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                        className="absolute inset-0 bg-gradient-to-r from-yellow-400 via-red-500 to-yellow-400 rounded-full blur-xl opacity-50"
+                    />
+                    <motion.button 
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => actions.drawWildcard()}
+                        className="relative w-32 h-32 rounded-full bg-black border-4 border-yellow-500 shadow-[0_0_30px_rgba(234,179,8,0.6)] flex flex-col items-center justify-center gap-1 group overflow-hidden"
+                    >
+                        <div className="absolute inset-0 bg-[url('/assets/card.png')] bg-cover opacity-20 group-hover:opacity-40 transition-opacity" />
+                        <Sparkles size={32} className="text-yellow-400 animate-pulse" />
+                        <span className="font-black text-yellow-100 text-xs text-center leading-tight uppercase tracking-widest drop-shadow-md">
+                            Draw<br/>Wildcard
+                        </span>
+                    </motion.button>
+                </div>
+                <div className="bg-black/80 backdrop-blur px-4 py-2 rounded text-center border border-yellow-500/30">
+                    <p className="text-yellow-400 font-bold text-xs uppercase tracking-widest">Last Stand Available!</p>
+                    <p className="text-gray-400 text-[10px]">Add 2 legendary heroes</p>
+                </div>
+            </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Main 3D Battlefield */}
       <div className="absolute inset-0 flex items-center justify-center overflow-hidden z-10 perspective-2000">
           <div className="relative w-[1200px] h-[800px] transform-style-3d rotate-x-30 transition-transform duration-700 ease-in-out">
@@ -347,6 +413,30 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
                         {showPhaseAnnouncement}
                     </h1>
                     <div className="w-1/2 h-1 bg-gradient-to-r from-transparent via-yellow-500 to-transparent mt-4" />
+                </div>
+            </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Wildcard Alert Overlay */}
+      <AnimatePresence>
+        {gameState.wildcardAlert && (
+            <motion.div 
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 1.2, filter: 'blur(10px)' }}
+                className="fixed inset-0 z-[60] flex items-center justify-center pointer-events-none"
+            >
+                <div className="w-full bg-gradient-to-r from-transparent via-black/80 to-transparent py-10 flex flex-col items-center">
+                    <h1 className="text-5xl md:text-7xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-white to-red-500 drop-shadow-[0_0_20px_rgba(239,68,68,0.8)] animate-pulse uppercase">
+                        {gameState.wildcardAlert} USED WILDCARD!
+                    </h1>
+                    <div className="flex items-center gap-2 mt-2 text-red-200 font-mono tracking-widest text-sm uppercase">
+                        <AlertTriangle size={16} />
+                        Reinforcements Incoming
+                        <AlertTriangle size={16} />
+                    </div>
+                    <div className="w-1/2 h-1 bg-gradient-to-r from-transparent via-red-600 to-transparent mt-4" />
                 </div>
             </motion.div>
         )}
