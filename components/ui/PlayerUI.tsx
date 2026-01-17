@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { GameCharacter } from '@/types/game';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
+import { Layers, Skull } from 'lucide-react';
 
 interface PlayerUIProps {
   player: PlayerState;
@@ -26,49 +27,62 @@ export function PlayerUI({ player, onCardClick, selectedCardId, canSwap }: Playe
   const showReadyToSummon = canSwap || hasEmptySlot;
 
   return (
-    <div className="w-full h-full flex flex-col justify-end pb-4 pointer-events-none">
+    <div className="w-full h-full flex flex-col justify-end pb-4 pointer-events-none relative">
       
-      {/* Stats Bar */}
-      <div className="pointer-events-auto bg-black/60 backdrop-blur-md border-t border-gray-700 p-2 flex justify-between items-center text-white w-full absolute bottom-0 z-50">
-         <div className="flex items-center gap-4">
+      {/* Player Status HUD (Styled like Opponent UI) */}
+      <div className="absolute bottom-4 left-4 pointer-events-auto z-50">
+        <div className="bg-black/60 backdrop-blur-md border border-gray-700/50 rounded-xl p-3 flex items-center gap-4 shadow-2xl min-w-[400px]">
+            
+            {/* Avatar */}
             <div className="relative">
-                <Image 
-                    src="/assets/showcase.png" 
-                    alt="Player Avatar" 
-                    width={60} 
-                    height={60} 
-                    className="rounded-full border-2 border-green-500 object-cover h-[60px] w-[60px] shadow-[0_0_10px_rgba(34,197,94,0.4)]"
-                />
-                <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-gray-900 rounded-full flex items-center justify-center text-xs border border-gray-600">
-                    LP
+                <div className="w-16 h-16 rounded-full border-2 border-green-500 overflow-hidden shadow-[0_0_15px_rgba(34,197,94,0.5)]">
+                    <Image 
+                        src="/assets/showcase.png" 
+                        alt="Player Avatar" 
+                        width={64} 
+                        height={64} 
+                        className="object-cover"
+                    />
+                </div>
+                <div className="absolute -bottom-2 -right-2 bg-green-900 text-[10px] font-bold px-2 py-0.5 rounded border border-green-500">
+                    YOU
                 </div>
             </div>
-            
-            <div className="flex flex-col">
-                <span className="text-xl font-bold tracking-widest text-green-400">PLAYER</span>
-                <div className="w-48 h-4 bg-gray-800 rounded-full overflow-hidden border border-gray-600 relative">
+
+            {/* Stats */}
+            <div className="flex-1 flex flex-col gap-1">
+                <div className="flex justify-between items-end">
+                    <h2 className="text-lg font-bold text-green-100 tracking-wider uppercase">Player</h2>
+                    <span className="text-2xl font-mono font-bold text-green-400">{player.hp}</span>
+                </div>
+
+                {/* HP Bar */}
+                <div className="w-full h-3 bg-gray-800 rounded-full overflow-hidden border border-gray-600 relative">
                     <motion.div 
                         initial={{ width: '100%' }}
-                        animate={{ width: `${Math.max(0, (player.hp / 8000) * 100)}%` }} // Assuming 8000 is max HP for scaling
-                        className="h-full bg-gradient-to-r from-green-600 to-green-400"
+                        animate={{ width: `${Math.max(0, (player.hp / 1000) * 100)}%` }} // Assuming 1000 max HP
+                        className="h-full bg-gradient-to-r from-green-700 to-green-500"
+                        transition={{ type: "spring", stiffness: 100, damping: 20 }}
                     />
-                    <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white shadow-black drop-shadow-md">
-                        {player.hp} / 8000
-                    </span>
+                </div>
+
+                {/* Counters */}
+                <div className="flex gap-4 mt-1 text-xs text-gray-400 font-mono">
+                    <div className="flex items-center gap-1">
+                        <Layers size={14} className="text-gray-500" />
+                        <span>DECK: <span className="text-white">{player.deck.length}</span></span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                        <div className="w-3 h-4 bg-gray-600 rounded-sm border border-gray-400" />
+                        <span>HAND: <span className="text-white">{player.hand.length}</span></span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                        <Skull size={14} className="text-gray-500" />
+                        <span>GRAVE: <span className="text-white">{player.graveyard.length}</span></span>
+                    </div>
                 </div>
             </div>
-         </div>
-
-         <div className="flex gap-6 pr-8">
-             <div className="text-center">
-                 <div className="text-xs text-gray-400 uppercase tracking-wider">Deck</div>
-                 <div className="text-xl font-mono">{player.deck.length}</div>
-             </div>
-             <div className="text-center">
-                 <div className="text-xs text-gray-400 uppercase tracking-wider">Grave</div>
-                 <div className="text-xl font-mono">{player.graveyard.length}</div>
-             </div>
-         </div>
+        </div>
       </div>
 
       {/* Reserve / Hand Container (Moved to Left) */}
