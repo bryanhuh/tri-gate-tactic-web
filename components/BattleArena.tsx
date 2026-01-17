@@ -9,7 +9,7 @@ import { FieldSlot } from './FieldSlot';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GameCharacter } from '@/types/game';
 import Image from 'next/image';
-import { RotateCcw, Volume2, VolumeX } from 'lucide-react';
+import { RotateCcw, Volume2, VolumeX, Trophy, Skull, Sword, Shield } from 'lucide-react';
 
 interface BattleActions {
   playCard: (card: GameCharacter, position: number) => void;
@@ -196,62 +196,6 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
     }
   };
 
-  if (gameState.phase === 'game-over') {
-      const playerLost = player.hp <= 0 || (player.field.every(c => c === null) && player.hand.length === 0);
-      const winnerAvatar = playerLost ? '/assets/opponent.png' : '/assets/showcase.png';
-      const resultImage = playerLost ? '/assets/defeat.jpeg' : '/assets/victory.jpeg';
-
-      return (
-          <div className="flex flex-col items-center justify-center w-full h-screen bg-gray-900 text-white overflow-hidden relative z-50">
-              <div className={`absolute inset-0 bg-gradient-to-br ${playerLost ? 'from-red-900/90 via-black to-black' : 'from-yellow-600/80 via-black to-blue-900/80'} backdrop-blur-md z-0`}></div>
-              
-              <div className="z-10 flex flex-col items-center gap-8 w-full max-w-4xl">
-                  <motion.div
-                      initial={{ scale: 0, opacity: 0, y: -50 }}
-                      animate={{ scale: 1, opacity: 1, y: 0 }}
-                      transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                      className="relative"
-                  >
-                      <Image 
-                          src={resultImage} 
-                          alt={playerLost ? "Defeat" : "Victory"} 
-                          width={600} 
-                          height={300}
-                          className="object-contain rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.8)] border-4 border-white/10"
-                      />
-                  </motion.div>
-
-                  <div className="relative w-full h-64 flex items-center justify-center">
-                      <motion.div
-                          className="absolute z-20"
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1.5 }}
-                          transition={{ duration: 0.5 }}
-                      >
-                          <Image 
-                              src={winnerAvatar} 
-                              alt="Winner Avatar" 
-                              width={100} 
-                              height={100} 
-                              className={`rounded-full border-4 ${playerLost ? 'border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.6)]' : 'border-yellow-400 shadow-[0_0_30px_rgba(250,204,21,0.6)]'} object-cover h-[100px] w-[100px]`}
-                          />
-                      </motion.div>
-                  </div>
-
-                  <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => window.location.reload()}
-                      className={`mt-16 px-10 py-4 rounded-full font-bold text-2xl shadow-lg flex items-center gap-3 transition-colors ${playerLost ? 'bg-red-600 hover:bg-red-500' : 'bg-yellow-500 hover:bg-yellow-400 text-black'}`}
-                  >
-                      <RotateCcw size={24} />
-                      Play Again
-                  </motion.button>
-              </div>
-          </div>
-      );
-  }
-
   return (
     <div className="flex flex-col w-full h-screen bg-black text-white overflow-hidden relative font-sans">
       <audio ref={audioRef} src="/assets/background.mp3" loop />
@@ -405,6 +349,110 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
                     <div className="w-1/2 h-1 bg-gradient-to-r from-transparent via-yellow-500 to-transparent mt-4" />
                 </div>
             </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Game Over Modal Overlay */}
+      <AnimatePresence>
+        {gameState.phase === 'game-over' && (
+             <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4"
+             >
+                <motion.div
+                    initial={{ scale: 0.9, y: 50, opacity: 0 }}
+                    animate={{ scale: 1, y: 0, opacity: 1 }}
+                    transition={{ type: "spring", bounce: 0.4 }}
+                    className="w-full max-w-2xl bg-gray-900 border border-gray-700 rounded-2xl overflow-hidden shadow-2xl relative"
+                >
+                    {/* Header */}
+                    <div className="relative h-48 flex items-center justify-center overflow-hidden">
+                        <div className={`absolute inset-0 bg-gradient-to-b ${player.hp <= 0 ? 'from-red-900/50' : 'from-yellow-600/50'} to-gray-900 z-0`} />
+                        <Image 
+                             src={player.hp <= 0 ? '/assets/defeat.jpeg' : '/assets/victory.jpeg'} 
+                             alt={player.hp <= 0 ? "Defeat" : "Victory"}
+                             layout="fill"
+                             objectFit="cover"
+                             className="opacity-40 z-0"
+                        />
+                        <div className="z-10 flex flex-col items-center">
+                            <h2 className={`text-6xl font-black tracking-tighter drop-shadow-lg ${player.hp <= 0 ? 'text-red-500' : 'text-yellow-400'}`}>
+                                {player.hp <= 0 ? "DEFEAT" : "VICTORY"}
+                            </h2>
+                            <p className="text-gray-300 font-bold tracking-widest mt-2 uppercase">
+                                {player.hp <= 0 ? "Better luck next time" : "You are the champion"}
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Stats Grid */}
+                    <div className="p-8 grid grid-cols-2 gap-6 bg-gray-900/50 relative z-10">
+                        <div className="flex items-center gap-4 bg-gray-800/50 p-4 rounded-xl border border-gray-700">
+                             <div className="p-3 bg-red-500/20 rounded-lg text-red-400">
+                                 <Sword size={24} />
+                             </div>
+                             <div>
+                                 <div className="text-sm text-gray-400 uppercase font-bold">Damage Dealt</div>
+                                 <div className="text-2xl font-mono font-bold text-white">
+                                     {1000 - opponent.hp}
+                                 </div>
+                             </div>
+                        </div>
+
+                        <div className="flex items-center gap-4 bg-gray-800/50 p-4 rounded-xl border border-gray-700">
+                             <div className="p-3 bg-blue-500/20 rounded-lg text-blue-400">
+                                 <Shield size={24} />
+                             </div>
+                             <div>
+                                 <div className="text-sm text-gray-400 uppercase font-bold">Damage Taken</div>
+                                 <div className="text-2xl font-mono font-bold text-white">
+                                     {1000 - player.hp}
+                                 </div>
+                             </div>
+                        </div>
+
+                         <div className="flex items-center gap-4 bg-gray-800/50 p-4 rounded-xl border border-gray-700">
+                             <div className="p-3 bg-green-500/20 rounded-lg text-green-400">
+                                 <Skull size={24} />
+                             </div>
+                             <div>
+                                 <div className="text-sm text-gray-400 uppercase font-bold">Enemies Slain</div>
+                                 <div className="text-2xl font-mono font-bold text-white">
+                                     {opponent.graveyard.length}
+                                 </div>
+                             </div>
+                        </div>
+
+                         <div className="flex items-center gap-4 bg-gray-800/50 p-4 rounded-xl border border-gray-700">
+                             <div className="p-3 bg-yellow-500/20 rounded-lg text-yellow-400">
+                                 <Trophy size={24} />
+                             </div>
+                             <div>
+                                 <div className="text-sm text-gray-400 uppercase font-bold">Rounds Played</div>
+                                 <div className="text-2xl font-mono font-bold text-white">
+                                     {turnCount}
+                                 </div>
+                             </div>
+                        </div>
+                    </div>
+
+                    {/* Footer / Actions */}
+                    <div className="p-6 border-t border-gray-700 bg-black/20 flex justify-center">
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => window.location.reload()}
+                            className={`px-12 py-4 rounded-full font-bold text-xl shadow-lg flex items-center gap-3 transition-colors ${player.hp <= 0 ? 'bg-red-600 hover:bg-red-500' : 'bg-yellow-500 hover:bg-yellow-400 text-black'}`}
+                        >
+                            <RotateCcw size={24} />
+                            Play Again
+                        </motion.button>
+                    </div>
+
+                </motion.div>
+             </motion.div>
         )}
       </AnimatePresence>
 
