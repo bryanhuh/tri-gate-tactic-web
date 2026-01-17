@@ -9,6 +9,7 @@ export interface PlayerState {
   field: (GameCharacter | null)[];
   deck: GameCharacter[];
   graveyard: GameCharacter[];
+  lastSwapTurn: number;
 }
 
 export interface GameState {
@@ -26,6 +27,7 @@ export type BattleAction =
   | { type: 'SETUP_GAME'; payload: { playerDeck: GameCharacter[]; opponentDeck: GameCharacter[] } }
   | { type: 'START_BATTLE' }
   | { type: 'PLAY_CARD'; payload: { card: GameCharacter; position: number } }
+  | { type: 'SWAP_CARDS'; payload: { handCard: GameCharacter; fieldPosition: number } }
   | { type: 'SELECT_ATTACKER'; payload: { attacker: GameCharacter } }
   | { type: 'SELECT_TARGET'; payload: { target: GameCharacter } }
   | { type: 'ATTACK' }

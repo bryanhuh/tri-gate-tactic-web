@@ -13,6 +13,7 @@ import { RotateCcw, Volume2, VolumeX } from 'lucide-react';
 
 interface BattleActions {
   playCard: (card: GameCharacter, position: number) => void;
+  swapCard: (handCard: GameCharacter, fieldPosition: number) => void;
   selectAttacker: (card: GameCharacter | undefined) => void;
   selectTarget: (card: GameCharacter) => void;
   attack: () => void;
@@ -33,6 +34,9 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
   const [showPhaseAnnouncement, setShowPhaseAnnouncement] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const logEndRef = useRef<HTMLDivElement>(null);
+
+  // Check if Swap is available
+  const canSwap = turnCount >= 3 && (turnCount - player.lastSwapTurn) >= 3;
 
   useEffect(() => {
     logEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -153,6 +157,19 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
     if (isAutoMode || gameState.phase === 'game-over') return;
     
     if (gameState.turn === 'player') {
+      
+      // If a hand card is selected and we click a field card (SWAP LOGIC)
+      if (selectedHandCard && player.field.includes(card)) {
+          if (canSwap) {
+              const fieldIndex = player.field.findIndex(c => c?.instanceId === card.instanceId);
+              if (fieldIndex !== -1) {
+                  actions.swapCard(selectedHandCard, fieldIndex);
+                  setSelectedHandCard(null);
+              }
+          }
+          return;
+      }
+
       if (player.field.includes(card) && !card.hasAttacked) {
         actions.selectAttacker(card);
         setSelectedHandCard(null); // Clear hand selection if choosing attacker
@@ -342,7 +359,12 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
                     <motion.div 
                         key={index} 
                         onClick={() => card && handleCardClick(card)}
-                        className={`relative transition-all duration-300 ${selectedAttacker?.instanceId === card?.instanceId ? "ring-4 ring-green-500 rounded-xl shadow-[0_0_40px_rgba(34,197,94,0.6)] z-20 scale-105" : ""}`}
+                        className={`relative transition-all duration-300 ${
+                             selectedAttacker?.instanceId === card?.instanceId 
+                             ? "ring-4 ring-green-500 rounded-xl shadow-[0_0_40px_rgba(34,197,94,0.6)] z-20 scale-105" 
+                             : selectedHandCard && canSwap ? "ring-4 ring-blue-500 rounded-xl shadow-[0_0_20px_rgba(59,130,246,0.5)] cursor-alias" : ""
+                        }`}
+                        whileHover={selectedHandCard && canSwap && card ? { scale: 1.1, z: 20 } : {}}
                     >
                         {card ? (
                             <motion.div 
@@ -392,6 +414,7 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
             player={player} 
             onCardClick={handleHandCardClick}
             selectedCardId={selectedHandCard?.instanceId}
+            canSwap={canSwap}
           />
       </div>
 

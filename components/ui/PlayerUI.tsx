@@ -9,9 +9,10 @@ interface PlayerUIProps {
   player: PlayerState;
   onCardClick?: (card: GameCharacter) => void;
   selectedCardId?: string;
+  canSwap?: boolean;
 }
 
-export function PlayerUI({ player, onCardClick, selectedCardId }: PlayerUIProps) {
+export function PlayerUI({ player, onCardClick, selectedCardId, canSwap }: PlayerUIProps) {
   const [hoveredCardIndex, setHoveredCardIndex] = useState<number | null>(null);
 
   // Calculate fan positioning for the left-side "Reserve" look
@@ -116,9 +117,12 @@ export function PlayerUI({ player, onCardClick, selectedCardId }: PlayerUIProps)
                                 <motion.div 
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    className="absolute -top-8 left-0 right-0 text-center text-[10px] font-bold text-yellow-400 uppercase tracking-widest bg-black/80 py-1 rounded border border-yellow-400/50"
+                                    className={`absolute -top-8 left-0 right-0 text-center text-[10px] font-bold uppercase tracking-widest py-1 rounded border 
+                                        ${canSwap 
+                                            ? "text-blue-400 bg-blue-900/80 border-blue-400/50 shadow-[0_0_10px_rgba(59,130,246,0.5)]" 
+                                            : "text-yellow-400 bg-black/80 border-yellow-400/50"}`}
                                 >
-                                    Ready to Summon
+                                    {canSwap ? "Swap Available" : "Ready to Summon"}
                                 </motion.div>
                             )}
                         </motion.div>

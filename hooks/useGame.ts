@@ -11,6 +11,7 @@ export const initialState: GameState = {
     field: [null, null, null],
     deck: [],
     graveyard: [],
+    lastSwapTurn: 0,
   },
   opponent: {
     hp: 1000,
@@ -18,6 +19,7 @@ export const initialState: GameState = {
     field: [null, null, null],
     deck: [],
     graveyard: [],
+    lastSwapTurn: 0,
   },
   battleLog: [],
 };
@@ -92,6 +94,51 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
           },
         };
       }
+    }
+    case 'SWAP_CARDS': {
+        const { handCard, fieldPosition } = action.payload;
+        const isPlayer = state.turn === 'player';
+        
+        // Cooldown check
+        const currentState = isPlayer ? state.player : state.opponent;
+        const canSwap = state.turnCount >= 3 && (state.turnCount - currentState.lastSwapTurn) >= 3;
+
+        if (!canSwap) {
+             return {
+                ...state,
+                battleLog: [...state.battleLog, `Cannot swap yet! Wait for cooldown.`],
+             };
+        }
+
+        if (isPlayer) {
+            const fieldCard = state.player.field[fieldPosition];
+            
+            // Remove hand card
+            let newHand = state.player.hand.filter(c => c.instanceId !== handCard.instanceId);
+            
+            // Add field card to hand if it exists
+            if (fieldCard) {
+                newHand.push(fieldCard);
+            }
+
+            // Place hand card on field
+            const newField = [...state.player.field];
+            newField[fieldPosition] = handCard;
+
+            return {
+                ...state,
+                player: {
+                    ...state.player,
+                    hand: newHand,
+                    field: newField,
+                    lastSwapTurn: state.turnCount,
+                },
+                battleLog: [...state.battleLog, `Player swapped ${handCard.name} with ${fieldCard?.name || 'Empty Slot'}!`],
+            };
+        } else {
+             // Opponent logic (can be expanded similarly if needed)
+             return state;
+        }
     }
     case 'SELECT_ATTACKER': {
         return {
