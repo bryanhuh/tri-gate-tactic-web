@@ -14,12 +14,12 @@ interface PlayerUIProps {
 export function PlayerUI({ player, onCardClick, selectedCardId }: PlayerUIProps) {
   const [hoveredCardIndex, setHoveredCardIndex] = useState<number | null>(null);
 
-  // Calculate fan positioning
+  // Calculate fan positioning for the left-side "Reserve" look
   const handSize = player.hand.length;
-  const angleStep = 5; // Degrees between cards
-  const baseAngle = -((handSize - 1) * angleStep) / 2;
-  const xOffsetStep = 60; // Overlap amount
-  const baseX = -((handSize - 1) * xOffsetStep) / 2;
+  const angleStep = 6; // Degrees between cards
+  const baseAngle = -15; // Start tilted
+  const xOffsetStep = 45; // Overlap amount
+  const baseX = 0; 
 
   return (
     <div className="w-full h-full flex flex-col justify-end pb-4 pointer-events-none">
@@ -67,46 +67,60 @@ export function PlayerUI({ player, onCardClick, selectedCardId }: PlayerUIProps)
          </div>
       </div>
 
-      {/* Hand Container */}
-      <div className="relative h-48 w-full flex justify-center items-end mb-24 pointer-events-none perspective-1000">
-         <div className="relative w-full max-w-4xl flex justify-center items-end h-full">
+      {/* Reserve / Hand Container (Moved to Left) */}
+      <div className="absolute bottom-20 left-8 h-64 w-1/3 flex justify-start items-end pointer-events-none perspective-2000">
+         <div className="relative flex justify-start items-end h-full">
             <AnimatePresence>
                 {player.hand.map((card, index) => {
                     const isHovered = hoveredCardIndex === index;
                     const isSelected = selectedCardId === card.instanceId;
                     
-                    // Fan calculations
+                    // Fan calculations for side fan
                     const rotation = baseAngle + (index * angleStep);
                     const xPos = baseX + (index * xOffsetStep);
-                    const yPos = Math.abs(index - (handSize - 1) / 2) * 5; // Slight arch
+                    const yPos = -index * 5; // Slight stair-step
 
                     return (
                         <motion.div
                             key={card.instanceId}
                             layoutId={card.instanceId}
-                            className="absolute transform-gpu origin-bottom pointer-events-auto"
+                            className="absolute transform-gpu origin-bottom-left pointer-events-auto"
                             style={{
                                 zIndex: isHovered ? 50 : index,
                                 bottom: 0,
                             }}
-                            initial={{ y: 200, opacity: 0 }}
+                            initial={{ x: -100, opacity: 0, rotate: -45 }}
                             animate={{ 
-                                x: isHovered ? xPos : xPos,
-                                y: isHovered ? -80 : yPos, // Pop up on hover
-                                rotate: isHovered ? 0 : rotation, // Straighten on hover
-                                scale: isHovered ? 1.3 : 1,
+                                x: isHovered ? xPos + 20 : xPos,
+                                y: isHovered ? -40 : yPos, // Lift on hover
+                                rotate: isHovered ? 0 : rotation,
+                                scale: isHovered ? 1.1 : 0.85, // Smaller base scale to look "reserved"
                                 opacity: 1 
                             }}
-                            exit={{ y: 200, opacity: 0, transition: { duration: 0.2 } }}
-                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                            exit={{ x: -100, opacity: 0, transition: { duration: 0.2 } }}
+                            transition={{ type: "spring", stiffness: 300, damping: 25 }}
                             onHoverStart={() => setHoveredCardIndex(index)}
                             onHoverEnd={() => setHoveredCardIndex(null)}
                             onClick={() => onCardClick?.(card)}
                         >
                             <Card 
                                 character={card} 
-                                className={`shadow-2xl ${isSelected ? "ring-4 ring-yellow-400 shadow-[0_0_30px_rgba(250,204,21,0.6)]" : "shadow-black"}`}
+                                className={`shadow-2xl transition-all duration-300 ${
+                                    isSelected 
+                                    ? "ring-4 ring-yellow-400 shadow-[0_0_30px_rgba(250,204,21,0.6)]" 
+                                    : "shadow-black grayscale-[0.2] contrast-[0.9]" // Slightly muted look for reserve
+                                } ${isHovered ? "grayscale-0 contrast-100" : ""}`}
                             />
+                            {/* Reserve Label (Optional, shown on hover or subtly) */}
+                            {isHovered && (
+                                <motion.div 
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="absolute -top-8 left-0 right-0 text-center text-[10px] font-bold text-yellow-400 uppercase tracking-widest bg-black/80 py-1 rounded border border-yellow-400/50"
+                                >
+                                    Ready to Summon
+                                </motion.div>
+                            )}
                         </motion.div>
                     );
                 })}
