@@ -4,6 +4,15 @@ import { GameCharacter } from '@/types/game';
 import { v4 as uuidv4 } from 'uuid';
 import { getRandomCharacter } from '@/lib/anilist-service';
 
+const FALLBACK_WILDCARD: GameCharacter = {
+    id: 9999,
+    instanceId: 'fallback',
+    name: "Unknown Reinforcement",
+    image: "/assets/card.png",
+    tier: "B",
+    stats: { hp: 200, power: 150, defense: 100, speed: 100, skill: 50 }
+};
+
 export function useBattle() {
   const [state, dispatch] = useReducer(gameReducer, initialState);
 
@@ -21,19 +30,18 @@ export function useBattle() {
         // Fetch 2 random characters
         // We do this sequentially or parallel. Parallel is faster.
         const [c1, c2] = await Promise.all([
-            getRandomCharacter(),
-            getRandomCharacter()
+            getRandomCharacter().catch(() => null),
+            getRandomCharacter().catch(() => null)
         ]);
 
-        if (c1 && c2) {
-            const wildcards = [
-                { ...c1, instanceId: uuidv4() },
-                { ...c2, instanceId: uuidv4() }
-            ];
-            dispatch({ type: 'DRAW_WILDCARD', payload: { wildcards } });
-        } else {
-            console.error("Failed to fetch wildcards");
-        }
+        const w1 = c1 || { ...FALLBACK_WILDCARD, name: "Mystery Reinforcement A" };
+        const w2 = c2 || { ...FALLBACK_WILDCARD, name: "Mystery Reinforcement B" };
+
+        const wildcards = [
+            { ...w1, instanceId: uuidv4() },
+            { ...w2, instanceId: uuidv4() }
+        ];
+        dispatch({ type: 'DRAW_WILDCARD', payload: { wildcards } });
     },
     clearWildcardAlert: () => dispatch({ type: 'CLEAR_WILDCARD_ALERT' }),
     selectAttacker: (attacker: GameCharacter) => dispatch({ type: 'SELECT_ATTACKER', payload: { attacker } }),
