@@ -57,7 +57,7 @@ export default function OpponentReveal({ opponentDeck, onComplete }: OpponentRev
                 animate={{ opacity: 1, y: 0 }}
                 className="text-4xl md:text-6xl font-extrabold text-red-500 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] tracking-wider"
             >
-                OPPONENT'S DECK REVEAL
+                OPPONENT&apos;S DECK REVEAL
             </motion.h2>
             <motion.p
               initial={{ opacity: 0 }}

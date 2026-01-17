@@ -114,7 +114,7 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
             const fieldCard = state.player.field[fieldPosition];
             
             // Remove hand card
-            let newHand = state.player.hand.filter(c => c.instanceId !== handCard.instanceId);
+            const newHand = state.player.hand.filter(c => c.instanceId !== handCard.instanceId);
             
             // Add field card to hand if it exists
             if (fieldCard) {
@@ -164,8 +164,8 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
         const target = selectedTarget;
         const damage = Math.max(0, attacker.stats.power - target.stats.defense);
 
-        let newPlayer = { ...player };
-        let newOpponent = { ...opponent };
+        const newPlayer = { ...player };
+        const newOpponent = { ...opponent };
         let logMessage = '';
         let phase = state.phase;
 
@@ -175,8 +175,8 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
         if (opponentTargetIndex !== -1) {
              // Handle damage to Opponent Card and Opponent HP
              const updatedTarget = { ...target, stats: { ...target.stats, hp: target.stats.hp - damage } };
-             let newOpponentField = [...newOpponent.field];
-             let newOpponentGraveyard = [...newOpponent.graveyard];
+             const newOpponentField = [...newOpponent.field];
+             const newOpponentGraveyard = [...newOpponent.graveyard];
              
              newOpponent.hp -= damage;
              logMessage = `${attacker.name} dealt ${damage} damage to ${target.name}.`;
@@ -208,8 +208,8 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
              if (playerTargetIndex !== -1) {
                  // Handle damage to Player Card and Player HP
                  const updatedTarget = { ...target, stats: { ...target.stats, hp: target.stats.hp - damage } };
-                 let newPlayerField = [...newPlayer.field];
-                 let newPlayerGraveyard = [...newPlayer.graveyard];
+                 const newPlayerField = [...newPlayer.field];
+                 const newPlayerGraveyard = [...newPlayer.graveyard];
 
                  newPlayer.hp -= damage;
                  logMessage = `Opponent's ${attacker.name} dealt ${damage} damage to your ${target.name}.`;

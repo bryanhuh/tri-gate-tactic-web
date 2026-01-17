@@ -15,6 +15,7 @@ export function useBattle() {
     startBattle: () => dispatch({ type: 'START_BATTLE' }),
     beginFight: () => dispatch({ type: 'BEGIN_FIGHT' }),
     playCard: (card: GameCharacter, position: number) => dispatch({ type: 'PLAY_CARD', payload: { card, position } }),
+    swapCard: (handCard: GameCharacter, fieldPosition: number) => dispatch({ type: 'SWAP_CARDS', payload: { handCard, fieldPosition } }),
     selectAttacker: (attacker: GameCharacter) => dispatch({ type: 'SELECT_ATTACKER', payload: { attacker } }),
     selectTarget: (target: GameCharacter) => dispatch({ type: 'SELECT_TARGET', payload: { target } }),
     attack: () => dispatch({ type: 'ATTACK' }),
