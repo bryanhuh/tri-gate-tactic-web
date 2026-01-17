@@ -226,6 +226,14 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
     }
   };
 
+  // Helper for Wildcard Alert Styles
+  const isPlayerAlert = gameState.wildcardAlert === 'PLAYER';
+  const alertColorClass = isPlayerAlert 
+      ? 'from-yellow-400 via-yellow-200 to-yellow-400 drop-shadow-[0_0_20px_rgba(234,179,8,0.8)]' 
+      : 'from-red-500 via-white to-red-500 drop-shadow-[0_0_20px_rgba(239,68,68,0.8)]';
+  const alertTextClass = isPlayerAlert ? 'text-yellow-200' : 'text-red-200';
+  const alertBorderClass = isPlayerAlert ? 'via-yellow-500' : 'via-red-600';
+
   return (
     <div className="flex flex-col w-full h-screen bg-black text-white overflow-hidden relative font-sans">
       <audio ref={audioRef} src="/assets/background.mp3" loop />
@@ -428,15 +436,15 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
                 className="fixed inset-0 z-[60] flex items-center justify-center pointer-events-none"
             >
                 <div className="w-full bg-gradient-to-r from-transparent via-black/80 to-transparent py-10 flex flex-col items-center">
-                    <h1 className="text-5xl md:text-7xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-white to-red-500 drop-shadow-[0_0_20px_rgba(239,68,68,0.8)] animate-pulse uppercase">
+                    <h1 className={`text-5xl md:text-7xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r ${alertColorClass} animate-pulse uppercase`}>
                         {gameState.wildcardAlert} USED WILDCARD!
                     </h1>
-                    <div className="flex items-center gap-2 mt-2 text-red-200 font-mono tracking-widest text-sm uppercase">
+                    <div className={`flex items-center gap-2 mt-2 font-mono tracking-widest text-sm uppercase ${alertTextClass}`}>
                         <AlertTriangle size={16} />
                         Reinforcements Incoming
                         <AlertTriangle size={16} />
                     </div>
-                    <div className="w-1/2 h-1 bg-gradient-to-r from-transparent via-red-600 to-transparent mt-4" />
+                    <div className={`w-1/2 h-1 bg-gradient-to-r from-transparent ${alertBorderClass} to-transparent mt-4`} />
                 </div>
             </motion.div>
         )}

@@ -1,6 +1,5 @@
 import { GameState, BattleAction } from '@/app/types/battle';
 import { GameCharacter } from '@/types/game';
-import { v4 as uuidv4 } from 'uuid';
 
 export const initialState: GameState = {
   phase: 'character-selection',
@@ -27,24 +26,6 @@ export const initialState: GameState = {
   battleLog: [],
   wildcardAlert: null,
 };
-
-// Expanded pool of balanced characters for wildcard
-const WILDCARD_POOL: GameCharacter[] = [
-    { id: 9001, instanceId: 'wc', name: "Spirit Fox", image: "https://s4.anilist.co/file/anilistcdn/character/large/b40-q0Kn048NuC50.png", tier: 'A', stats: { hp: 220, power: 180, defense: 140, speed: 110, skill: 80 } },
-    { id: 9002, instanceId: 'wc', name: "Iron Golem", image: "https://s4.anilist.co/file/anilistcdn/character/large/b17-6EfaK450621B.png", tier: 'B+', stats: { hp: 300, power: 150, defense: 200, speed: 40, skill: 50 } },
-    { id: 9003, instanceId: 'wc', name: "Wind Blade", image: "https://s4.anilist.co/file/anilistcdn/character/large/b86-d86.png", tier: 'A-', stats: { hp: 180, power: 210, defense: 100, speed: 120, skill: 90 } },
-    { id: 9004, instanceId: 'wc', name: "Shadow Rogue", image: "https://s4.anilist.co/file/anilistcdn/character/large/b85-d85.png", tier: 'B', stats: { hp: 160, power: 190, defense: 90, speed: 130, skill: 100 } },
-    { id: 9005, instanceId: 'wc', name: "Battle Mage", image: "https://s4.anilist.co/file/anilistcdn/character/large/b24-d24.png", tier: 'A', stats: { hp: 200, power: 200, defense: 120, speed: 80, skill: 110 } },
-];
-
-function generateWildcards(): GameCharacter[] {
-    // Pick 2 random unique cards from the pool
-    const shuffled = [...WILDCARD_POOL].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, 2).map(c => ({
-        ...c,
-        instanceId: uuidv4(),
-    }));
-}
 
 export function gameReducer(state: GameState, action: BattleAction): GameState {
   switch (action.type) {
@@ -164,12 +145,11 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
     }
     case 'DRAW_WILDCARD': {
         const isPlayer = state.turn === 'player';
-        const user = isPlayer ? 'Player' : 'Opponent';
         
         if (isPlayer && state.player.wildcardUsed) return state;
         if (!isPlayer && state.opponent.wildcardUsed) return state;
 
-        const wildcards = generateWildcards();
+        const { wildcards } = action.payload;
         
         if (isPlayer) {
             return {

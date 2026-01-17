@@ -30,7 +30,7 @@ export type BattleAction =
   | { type: 'START_BATTLE' }
   | { type: 'PLAY_CARD'; payload: { card: GameCharacter; position: number } }
   | { type: 'SWAP_CARDS'; payload: { handCard: GameCharacter; fieldPosition: number } }
-  | { type: 'DRAW_WILDCARD' }
+  | { type: 'DRAW_WILDCARD'; payload: { wildcards: GameCharacter[] } }
   | { type: 'CLEAR_WILDCARD_ALERT' }
   | { type: 'SELECT_ATTACKER'; payload: { attacker: GameCharacter } }
   | { type: 'SELECT_TARGET'; payload: { target: GameCharacter } }
