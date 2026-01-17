@@ -24,6 +24,19 @@ body {
   font-family: var(--font-rajdhani), Arial, Helvetica, sans-serif;
 }
 
+/* 3D Utilities */
+.perspective-2000 {
+  perspective: 2000px;
+}
+
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+
+.rotate-x-30 {
+  transform: rotateX(30deg);
+}
+
 /* Flip card styles */
 .flip-card {
   background-color: transparent;

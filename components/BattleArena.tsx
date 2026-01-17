@@ -9,11 +9,19 @@ import { FieldSlot } from './FieldSlot';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GameCharacter } from '@/types/game';
 import Image from 'next/image';
-import { Play, RotateCcw } from 'lucide-react';
+import { RotateCcw, Volume2, VolumeX } from 'lucide-react';
+
+interface BattleActions {
+  playCard: (card: GameCharacter, position: number) => void;
+  selectAttacker: (card: GameCharacter | undefined) => void;
+  selectTarget: (card: GameCharacter) => void;
+  attack: () => void;
+  endTurn: () => void;
+}
 
 interface BattleArenaProps {
   gameState: GameState;
-  actions: any;
+  actions: BattleActions;
 }
 
 export function BattleArena({ gameState, actions }: BattleArenaProps) {
@@ -21,11 +29,46 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
   const [showPlayerDeck, setShowPlayerDeck] = useState(false);
   const [isAutoMode, setIsAutoMode] = useState(false);
   const [selectedHandCard, setSelectedHandCard] = useState<GameCharacter | null>(null);
+  const [isPlayingMusic, setIsPlayingMusic] = useState(false);
+  const [showPhaseAnnouncement, setShowPhaseAnnouncement] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const logEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     logEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [battleLog]);
+
+  // Phase Announcement Effect
+  useEffect(() => {
+      let phaseName = '';
+      if (gameState.phase === 'setup') phaseName = "DUEL START";
+      else if (gameState.turn === 'player') phaseName = "YOUR TURN";
+      else if (gameState.turn === 'opponent') phaseName = "OPPONENT TURN";
+      else if (gameState.phase === 'game-over') phaseName = "GAME OVER";
+
+      if (phaseName) {
+          // Wrap in setTimeout to avoid synchronous state update warning during render phase
+          const showTimer = setTimeout(() => {
+             setShowPhaseAnnouncement(phaseName);
+          }, 0);
+          
+          const hideTimer = setTimeout(() => setShowPhaseAnnouncement(null), 2000);
+          return () => {
+              clearTimeout(showTimer);
+              clearTimeout(hideTimer);
+          };
+      }
+  }, [gameState.phase, gameState.turn]);
+
+
+  // Music Control
+  useEffect(() => {
+    if (audioRef.current) {
+        audioRef.current.volume = 0.3;
+        if (isPlayingMusic) audioRef.current.play().catch(e => console.log("Audio play failed", e));
+        else audioRef.current.pause();
+    }
+  }, [isPlayingMusic]);
 
   // Player Auto Mode AI
   useEffect(() => {
@@ -106,7 +149,7 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
     }
   }, [turn, opponent.field, player.field, opponent.hand, actions, gameState.phase]);
 
-  const handleCardClick = (card: any) => {
+  const handleCardClick = (card: GameCharacter) => {
     if (isAutoMode || gameState.phase === 'game-over') return;
     
     if (gameState.turn === 'player') {
@@ -124,7 +167,7 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
     if (isAutoMode || gameState.phase === 'game-over') return;
     if (gameState.turn === 'player') {
         setSelectedHandCard(selectedHandCard?.instanceId === card.instanceId ? null : card);
-        actions.selectAttacker(undefined as any); // Clear attacker selection if choosing hand card
+        actions.selectAttacker(undefined); // Clear attacker selection if choosing hand card
     }
   };
 
@@ -138,19 +181,11 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
 
   if (gameState.phase === 'game-over') {
       const playerLost = player.hp <= 0 || (player.field.every(c => c === null) && player.hand.length === 0);
-      const winner = playerLost ? 'Opponent' : 'Player';
       const winnerAvatar = playerLost ? '/assets/opponent.png' : '/assets/showcase.png';
-      const winnerCards = playerLost ? opponent.field : player.field;
       const resultImage = playerLost ? '/assets/defeat.jpeg' : '/assets/victory.jpeg';
-
-      // Animation start positions
-      const initialAvatarPos = playerLost 
-          ? { top: '10%', left: '10%', scale: 0.5 } 
-          : { bottom: '10%', left: '10%', scale: 0.5 };
 
       return (
           <div className="flex flex-col items-center justify-center w-full h-screen bg-gray-900 text-white overflow-hidden relative z-50">
-              {/* Dynamic Background */}
               <div className={`absolute inset-0 bg-gradient-to-br ${playerLost ? 'from-red-900/90 via-black to-black' : 'from-yellow-600/80 via-black to-blue-900/80'} backdrop-blur-md z-0`}></div>
               
               <div className="z-10 flex flex-col items-center gap-8 w-full max-w-4xl">
@@ -167,15 +202,14 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
                           height={300}
                           className="object-contain rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.8)] border-4 border-white/10"
                       />
-                      <div className="absolute inset-0 rounded-2xl shadow-inner pointer-events-none"></div>
                   </motion.div>
 
                   <div className="relative w-full h-64 flex items-center justify-center">
                       <motion.div
                           className="absolute z-20"
-                          initial={initialAvatarPos as any}
-                          animate={{ top: '50%', left: '50%', x: '-50%', y: '-50%', scale: 1.5, bottom: 'auto' }}
-                          transition={{ duration: 1.2, ease: [0.34, 1.56, 0.64, 1] }}
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1.5 }}
+                          transition={{ duration: 0.5 }}
                       >
                           <Image 
                               src={winnerAvatar} 
@@ -185,24 +219,10 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
                               className={`rounded-full border-4 ${playerLost ? 'border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.6)]' : 'border-yellow-400 shadow-[0_0_30px_rgba(250,204,21,0.6)]'} object-cover h-[100px] w-[100px]`}
                           />
                       </motion.div>
-                      
-                      {/* Winner's Cards animating in */}
-                      <div className="flex gap-6 items-center justify-center absolute top-28 w-full">
-                          {winnerCards.map((card, index) => card ? (
-                              <motion.div
-                                  key={card.instanceId}
-                                  initial={{ opacity: 0, y: 100, rotate: -10 }}
-                                  animate={{ opacity: 1, y: 0, rotate: 0 }}
-                                  transition={{ delay: 0.8 + (index * 0.15), type: "spring" }}
-                              >
-                                  <Card character={card} className={`scale-75 shadow-xl ${playerLost ? 'border-red-500/50' : 'border-yellow-400/50'}`} />
-                              </motion.div>
-                          ) : null)}
-                      </div>
                   </div>
 
                   <motion.button
-                      whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(255,255,255,0.3)" }}
+                      whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => window.location.reload()}
                       className={`mt-16 px-10 py-4 rounded-full font-bold text-2xl shadow-lg flex items-center gap-3 transition-colors ${playerLost ? 'bg-red-600 hover:bg-red-500' : 'bg-yellow-500 hover:bg-yellow-400 text-black'}`}
@@ -216,94 +236,163 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
   }
 
   return (
-    <div className="flex flex-col items-center justify-between w-full h-screen bg-gray-900 text-white overflow-hidden relative">
+    <div className="flex flex-col w-full h-screen bg-black text-white overflow-hidden relative font-sans">
+      <audio ref={audioRef} src="/assets/background.mp3" loop />
       
-      {/* Round Indicator */}
-      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20 bg-black/50 backdrop-blur-md border border-gray-600 px-6 py-2 rounded-full shadow-lg">
-         <h2 className="text-xl font-bold tracking-widest text-white">ROUND {turnCount}</h2>
+      {/* Background Ambience */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-gray-800 via-gray-900 to-black z-0">
+        <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
+        {/* Animated Particles/Fog can go here */}
       </div>
 
-      {/* Battle Status / Turn Indicator */}
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0 opacity-20">
-         <h1 className="text-9xl font-bold uppercase tracking-widest">{turn}</h1>
+      {/* Top HUD */}
+      <div className="absolute top-0 w-full z-40 flex justify-between items-start p-4 pointer-events-none">
+         <div className="pointer-events-auto flex items-center gap-4">
+             <div className="bg-black/60 backdrop-blur border border-gray-600 rounded-full px-4 py-2 flex items-center gap-2">
+                <span className="text-gray-400 font-bold tracking-widest text-xs">ROUND</span>
+                <span className="text-xl font-bold">{turnCount}</span>
+             </div>
+             
+             <button 
+                onClick={() => setIsPlayingMusic(!isPlayingMusic)} 
+                className="p-2 bg-gray-800 rounded-full hover:bg-gray-700 transition"
+             >
+                {isPlayingMusic ? <Volume2 size={20} /> : <VolumeX size={20} />}
+             </button>
+         </div>
+
+         <div className="pointer-events-auto">
+             <OpponentUI opponent={opponent} />
+         </div>
       </div>
 
-      {/* Battle Log */}
-      <div className="absolute top-20 right-4 w-80 h-48 bg-black/60 backdrop-blur-sm border border-gray-700 rounded-lg p-2 overflow-y-auto z-20 text-sm font-mono shadow-lg">
-          <h3 className="text-gray-400 text-xs uppercase mb-2 border-b border-gray-700 pb-1">Battle Log</h3>
-          <div className="flex flex-col gap-1">
-             {battleLog.map((log, index) => (
-                 <div key={index} className="text-gray-200 break-words leading-tight">
-                     <span className="text-gray-500 mr-2">[{index + 1}]</span>
-                     {log}
-                 </div>
-             ))}
-             <div ref={logEndRef} />
+      {/* Right Sidebar: Battle Log & Controls */}
+      <div className="absolute right-0 top-1/4 bottom-32 w-64 p-4 z-40 pointer-events-none flex flex-col items-end gap-4">
+          <div className="w-full h-48 bg-black/50 backdrop-blur-md border border-gray-700/50 rounded-lg p-2 overflow-y-auto pointer-events-auto shadow-lg">
+             <h3 className="text-xs font-bold text-gray-500 uppercase mb-2 sticky top-0 bg-black/50 backdrop-blur pb-1">Battle Log</h3>
+             <div className="flex flex-col gap-1.5 text-xs font-mono">
+                {battleLog.map((log, index) => (
+                    <div key={index} className="text-gray-300 border-l-2 border-gray-600 pl-2 py-0.5">
+                        {log}
+                    </div>
+                ))}
+                <div ref={logEndRef} />
+             </div>
+          </div>
+
+          <div className="pointer-events-auto flex flex-col gap-2 w-full">
+               <button 
+                  onClick={() => setIsAutoMode(!isAutoMode)}
+                  className={`w-full py-3 rounded font-bold uppercase tracking-wider text-xs shadow-lg transition-all ${isAutoMode ? 'bg-yellow-500/20 border border-yellow-500 text-yellow-500' : 'bg-gray-800/80 border border-gray-600 hover:bg-gray-700'}`}
+               >
+                  Auto Battle: {isAutoMode ? 'ON' : 'OFF'}
+               </button>
+               <button 
+                  onClick={() => setShowPlayerDeck(true)}
+                  className="w-full py-3 bg-blue-600/20 border border-blue-500 hover:bg-blue-600/40 text-blue-400 rounded font-bold uppercase tracking-wider text-xs shadow-lg transition-all"
+               >
+                  View Deck
+               </button>
+               <button 
+                  onClick={() => actions.endTurn()}
+                  disabled={turn !== 'player' || isAutoMode}
+                  className="w-full py-4 bg-red-600 hover:bg-red-500 disabled:bg-gray-800 disabled:text-gray-500 disabled:cursor-not-allowed rounded font-bold uppercase tracking-wider text-sm shadow-red-900/50 shadow-lg transition-all"
+               >
+                  End Phase
+               </button>
           </div>
       </div>
 
-      <div className="w-full z-10 bg-gray-800/80 backdrop-blur-sm border-b border-gray-700">
-          <OpponentUI opponent={opponent} />
+      {/* Main 3D Battlefield */}
+      <div className="absolute inset-0 flex items-center justify-center overflow-hidden z-10 perspective-2000">
+          <div className="relative w-[1200px] h-[800px] transform-style-3d rotate-x-30 transition-transform duration-700 ease-in-out">
+             
+             {/* Board Base / Mat */}
+             <div className="absolute inset-0 bg-gray-900/40 rounded-3xl border border-gray-700/30 shadow-[0_0_100px_rgba(0,0,0,0.5)] backdrop-blur-sm transform-style-3d">
+                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px]" />
+                
+                {/* Center Line */}
+                <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent shadow-[0_0_10px_rgba(6,182,212,0.8)]" />
+             </div>
+
+             {/* Opponent Field */}
+             <div className="absolute top-20 left-0 right-0 flex justify-center gap-6 transform-style-3d">
+                {opponent.field.map((card, index) => (
+                    <motion.div 
+                        key={index} 
+                        onClick={() => card && handleCardClick(card)}
+                        whileHover={card && selectedAttacker ? { scale: 1.1, z: 20 } : {}}
+                        className={`relative transition-all duration-300 ${selectedAttacker && card ? "ring-4 ring-red-500 rounded-xl shadow-[0_0_30px_rgba(239,68,68,0.6)] cursor-crosshair" : ""}`}
+                    >
+                        {card ? (
+                            <div className="relative shadow-2xl">
+                                <Card character={card} />
+                                {/* Opponent cards facing player but maybe darker or red tint if enemy? No, keep clear. */}
+                            </div>
+                        ) : (
+                            <FieldSlot />
+                        )}
+                    </motion.div>
+                ))}
+             </div>
+
+             {/* Player Field */}
+             <div className="absolute bottom-40 left-0 right-0 flex justify-center gap-6 transform-style-3d">
+                {player.field.map((card, index) => (
+                    <motion.div 
+                        key={index} 
+                        onClick={() => card && handleCardClick(card)}
+                        className={`relative transition-all duration-300 ${selectedAttacker?.instanceId === card?.instanceId ? "ring-4 ring-green-500 rounded-xl shadow-[0_0_40px_rgba(34,197,94,0.6)] z-20 scale-105" : ""}`}
+                    >
+                        {card ? (
+                            <motion.div 
+                                initial={{ opacity: 0, scale: 2, z: 200 }} 
+                                animate={{ opacity: 1, scale: 1, z: 0 }} 
+                                transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                                className="shadow-2xl"
+                            >
+                                <Card character={card} />
+                                {card.hasAttacked && (
+                                    <div className="absolute inset-0 bg-black/50 rounded-xl flex items-center justify-center">
+                                        <span className="text-xs font-bold uppercase text-white/50 border border-white/20 px-2 py-1 rounded">Exhausted</span>
+                                    </div>
+                                )}
+                            </motion.div>
+                        ) : (
+                            <FieldSlot onClick={() => handleFieldSlotClick(index)} isActive={!!selectedHandCard && gameState.turn === 'player'} />
+                        )}
+                    </motion.div>
+                ))}
+             </div>
+          </div>
       </div>
 
-      <div className="flex-1 flex flex-col justify-center items-center gap-12 w-full z-10 px-4">
-        {/* Opponent Field */}
-        <div className="flex gap-4">
-          {opponent.field.map((card, index) => (
+      {/* Phase Announcement Overlay */}
+      <AnimatePresence>
+        {showPhaseAnnouncement && (
             <motion.div 
-                key={index} 
-                onClick={() => card && handleCardClick(card)}
-                whileHover={card && selectedAttacker ? { scale: 1.1, cursor: 'crosshair' } : {}}
-                className={selectedAttacker && card ? "ring-2 ring-red-500 rounded-xl" : ""}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 1.2, filter: 'blur(10px)' }}
+                className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none"
             >
-              {card ? <Card character={card} /> : <FieldSlot />}
+                <div className="w-full bg-gradient-to-r from-transparent via-black/80 to-transparent py-10 flex flex-col items-center">
+                    <h1 className="text-6xl md:text-8xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-white to-yellow-300 drop-shadow-[0_0_20px_rgba(250,204,21,0.5)] animate-pulse">
+                        {showPhaseAnnouncement}
+                    </h1>
+                    <div className="w-1/2 h-1 bg-gradient-to-r from-transparent via-yellow-500 to-transparent mt-4" />
+                </div>
             </motion.div>
-          ))}
-        </div>
+        )}
+      </AnimatePresence>
 
-        {/* Player Field */}
-        <div className="flex gap-4">
-          {player.field.map((card, index) => (
-            <motion.div 
-                key={index} 
-                onClick={() => card && handleCardClick(card)}
-                whileHover={gameState.turn === 'player' && card && !card.hasAttacked ? { scale: 1.1, cursor: 'pointer' } : {}}
-                className={selectedAttacker?.instanceId === card?.instanceId ? "ring-4 ring-green-500 rounded-xl shadow-[0_0_20px_rgba(34,197,94,0.5)]" : ""}
-            >
-              {card ? <Card character={card} /> : <FieldSlot onClick={() => handleFieldSlotClick(index)} />}
-            </motion.div>
-          ))}
-        </div>
-      </div>
-
-      <div className="w-full z-10 bg-gray-800/80 backdrop-blur-sm border-t border-gray-700 relative">
+      {/* Player UI (Hand) */}
+      <div className="absolute bottom-0 w-full z-30 pointer-events-none">
           <PlayerUI 
             player={player} 
             onCardClick={handleHandCardClick}
             selectedCardId={selectedHandCard?.instanceId}
           />
-          
-          <div className="absolute bottom-4 right-4 flex gap-2">
-             <button 
-                onClick={() => setIsAutoMode(!isAutoMode)}
-                className={`px-4 py-2 rounded font-bold ${isAutoMode ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-gray-600 hover:bg-gray-500'}`}
-             >
-                Mode: {isAutoMode ? 'Auto' : 'Manual'}
-             </button>
-             <button 
-                onClick={() => setShowPlayerDeck(true)}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded font-bold"
-             >
-                View Deck
-             </button>
-             <button 
-                onClick={() => actions.endTurn()}
-                disabled={turn !== 'player' || isAutoMode}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 rounded font-bold"
-             >
-                End Turn
-             </button>
-          </div>
       </div>
 
       {/* Deck Modal */}
