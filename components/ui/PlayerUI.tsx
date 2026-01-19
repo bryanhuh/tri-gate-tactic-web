@@ -3,7 +3,7 @@ import { Card } from '../Card';
 import Image from 'next/image';
 import { GameCharacter } from '@/types/game';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { Layers, Skull } from 'lucide-react';
 
 interface PlayerUIProps {
@@ -13,7 +13,7 @@ interface PlayerUIProps {
   canSwap?: boolean;
 }
 
-export function PlayerUI({ player, onCardClick, selectedCardId, canSwap }: PlayerUIProps) {
+export const PlayerUI = memo(function PlayerUI({ player, onCardClick, selectedCardId, canSwap }: PlayerUIProps) {
   const [hoveredCardIndex, setHoveredCardIndex] = useState<number | null>(null);
 
   // Calculate fan positioning for the left-side "Reserve" look
@@ -161,4 +161,4 @@ export function PlayerUI({ player, onCardClick, selectedCardId, canSwap }: Playe
       </div>
     </div>
   );
-}
+});

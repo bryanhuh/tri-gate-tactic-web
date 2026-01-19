@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { GameState } from '@/app/types/battle';
 import { PlayerUI } from './ui/PlayerUI';
 import { OpponentUI } from './ui/OpponentUI';
@@ -183,7 +183,7 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
     }
   }, [turn, opponent.field, player.field, opponent.hand, actions, gameState.phase, opponent.wildcardUsed]);
 
-  const handleCardClick = (card: GameCharacter) => {
+  const handleCardClick = useCallback((card: GameCharacter) => {
     if (isAutoMode || gameState.phase === 'game-over') return;
     
     if (gameState.turn === 'player') {
@@ -208,23 +208,23 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
         actions.attack();
       }
     }
-  };
+  }, [isAutoMode, gameState.phase, gameState.turn, selectedHandCard, player.field, opponent.field, selectedAttacker, actions, canSwap]);
 
-  const handleHandCardClick = (card: GameCharacter) => {
+  const handleHandCardClick = useCallback((card: GameCharacter) => {
     if (isAutoMode || gameState.phase === 'game-over') return;
     if (gameState.turn === 'player') {
-        setSelectedHandCard(selectedHandCard?.instanceId === card.instanceId ? null : card);
+        setSelectedHandCard(prev => prev?.instanceId === card.instanceId ? null : card);
         actions.selectAttacker(undefined); // Clear attacker selection if choosing hand card
     }
-  };
+  }, [isAutoMode, gameState.phase, gameState.turn, actions]);
 
-  const handleFieldSlotClick = (position: number) => {
+  const handleFieldSlotClick = useCallback((position: number) => {
     if (isAutoMode || gameState.phase === 'game-over') return;
     if (gameState.turn === 'player' && selectedHandCard) {
         actions.playCard(selectedHandCard, position);
         setSelectedHandCard(null);
     }
-  };
+  }, [isAutoMode, gameState.phase, gameState.turn, selectedHandCard, actions]);
 
   // Helper for Wildcard Alert Styles
   const isPlayerAlert = gameState.wildcardAlert === 'PLAYER';
@@ -253,7 +253,7 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
              </div>
              
              <button 
-                onClick={() => setIsPlayingMusic(!isPlayingMusic)} 
+                onClick={() => setIsPlayingMusic(prev => !prev)} 
                 className="p-2 bg-gray-800 rounded-full hover:bg-gray-700 transition"
              >
                 {isPlayingMusic ? <Volume2 size={20} /> : <VolumeX size={20} />}
@@ -281,7 +281,7 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
 
           <div className="pointer-events-auto flex flex-col gap-2 w-full">
                <button 
-                  onClick={() => setIsAutoMode(!isAutoMode)}
+                  onClick={() => setIsAutoMode(prev => !prev)}
                   className={`w-full py-3 rounded font-bold uppercase tracking-wider text-xs shadow-lg transition-all ${isAutoMode ? 'bg-yellow-500/20 border border-yellow-500 text-yellow-500' : 'bg-gray-800/80 border border-gray-600 hover:bg-gray-700'}`}
                >
                   Auto Battle: {isAutoMode ? 'ON' : 'OFF'}
@@ -293,7 +293,7 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
                   View Deck
                </button>
                <button 
-                  onClick={() => actions.endTurn()}
+                  onClick={actions.endTurn}
                   disabled={turn !== 'player' || isAutoMode}
                   className="w-full py-4 bg-red-600 hover:bg-red-500 disabled:bg-gray-800 disabled:text-gray-500 disabled:cursor-not-allowed rounded font-bold uppercase tracking-wider text-sm shadow-red-900/50 shadow-lg transition-all"
                >
@@ -320,7 +320,7 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
                     <motion.button 
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => actions.drawWildcard()}
+                        onClick={actions.drawWildcard}
                         className="relative w-32 h-32 rounded-full bg-black border-4 border-yellow-500 shadow-[0_0_30px_rgba(234,179,8,0.6)] flex flex-col items-center justify-center gap-1 group overflow-hidden"
                     >
                         <div className="absolute inset-0 bg-[url('/assets/card.png')] bg-cover opacity-20 group-hover:opacity-40 transition-opacity" />

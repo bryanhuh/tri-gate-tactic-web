@@ -2,12 +2,13 @@ import { PlayerState } from '@/app/types/battle';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Layers,  Skull } from 'lucide-react';
+import { memo } from 'react';
 
 interface OpponentUIProps {
   opponent: PlayerState;
 }
 
-export function OpponentUI({ opponent }: OpponentUIProps) {
+export const OpponentUI = memo(function OpponentUI({ opponent }: OpponentUIProps) {
   return (
     <div className="pointer-events-none"> {/* Removed absolute positioning wrapper */}
       <div className="bg-black/60 backdrop-blur-md border border-gray-700/50 rounded-xl p-3 flex items-center gap-4 shadow-2xl min-w-[400px]">
@@ -64,4 +65,4 @@ export function OpponentUI({ opponent }: OpponentUIProps) {
       </div>
     </div>
   );
-}
+});

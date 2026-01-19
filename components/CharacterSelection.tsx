@@ -6,6 +6,7 @@ import { getRandomCharacter } from '@/lib/anilist-service';
 import { Card } from './Card';
 import { Spinner } from './ui/Loaders';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Toast, ToastType } from './ui/Toast';
 
 interface CharacterSelectionProps {
   onBattleStart: (playerDeck: GameCharacter[], opponentDeck: GameCharacter[]) => void;
@@ -18,6 +19,20 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
   const [isFetchingDeck, setIsFetchingDeck] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [savedTeam, setSavedTeam] = useState<GameCharacter[] | null>(null);
+  
+  const [toast, setToast] = useState<{ message: string; type: ToastType; isVisible: boolean }>({
+    message: '',
+    type: 'info',
+    isVisible: false,
+  });
+
+  const showToast = (message: string, type: ToastType = 'info') => {
+    setToast({ message, type, isVisible: true });
+  };
+
+  const closeToast = () => {
+    setToast(prev => ({ ...prev, isVisible: false }));
+  };
 
   // Load saved team on mount
   useEffect(() => {
@@ -46,6 +61,7 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
     if (savedTeam) {
       setCharacters(savedTeam);
       setFlipped(Array(5).fill(true));
+      showToast('Previous team loaded!', 'success');
     }
   };
 
@@ -59,19 +75,26 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
     });
 
     const excludeNames = characters.map(c => c?.name).filter(Boolean) as string[];
-    const character = await getRandomCharacter(excludeNames);
+    
+    try {
+        const character = await getRandomCharacter(excludeNames);
 
-    if (character) {
-      setCharacters(prev => {
-        const newCharacters = [...prev];
-        newCharacters[index] = character;
-        return newCharacters;
-      });
-      setFlipped(prev => {
-        const newFlipped = [...prev];
-        newFlipped[index] = true;
-        return newFlipped;
-      });
+        if (character) {
+        setCharacters(prev => {
+            const newCharacters = [...prev];
+            newCharacters[index] = character;
+            return newCharacters;
+        });
+        setFlipped(prev => {
+            const newFlipped = [...prev];
+            newFlipped[index] = true;
+            return newFlipped;
+        });
+        } else {
+            showToast('Failed to fetch character. Please try again.', 'error');
+        }
+    } catch (e) {
+        showToast('Network error occurred.', 'error');
     }
 
     setLoading(prev => {
@@ -92,17 +115,26 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
     let attempts = 0;
     const maxAttempts = 20;
 
-    while (opponentDeck.length < 5 && attempts < maxAttempts) {
-        attempts++;
-        const char = await getRandomCharacter(excludeNames);
-        if (char) {
-            opponentDeck.push(char);
-            excludeNames.push(char.name);
+    try {
+        while (opponentDeck.length < 5 && attempts < maxAttempts) {
+            attempts++;
+            const char = await getRandomCharacter(excludeNames);
+            if (char) {
+                opponentDeck.push(char);
+                excludeNames.push(char.name);
+            }
         }
-    }
 
-    await onBattleStart(playerDeck, opponentDeck);
-    setIsFetchingDeck(false);
+        if (opponentDeck.length === 5) {
+            await onBattleStart(playerDeck, opponentDeck);
+        } else {
+            showToast('Could not find enough opponents. Try again!', 'error');
+        }
+    } catch (e) {
+        showToast('Failed to setup battle.', 'error');
+    } finally {
+        setIsFetchingDeck(false);
+    }
   };
 
   const allCharactersSelected = characters.every(c => c !== null);
@@ -125,6 +157,13 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen relative overflow-hidden">
       
+      <Toast 
+        message={toast.message} 
+        type={toast.type} 
+        isVisible={toast.isVisible} 
+        onClose={closeToast} 
+      />
+
       {/* Info Button */}
       <div className="absolute top-4 right-4 z-50">
         <button 
