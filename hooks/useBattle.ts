@@ -44,7 +44,7 @@ export function useBattle() {
         dispatch({ type: 'DRAW_WILDCARD', payload: { wildcards } });
     },
     clearWildcardAlert: () => dispatch({ type: 'CLEAR_WILDCARD_ALERT' }),
-    selectAttacker: (attacker: GameCharacter) => dispatch({ type: 'SELECT_ATTACKER', payload: { attacker } }),
+    selectAttacker: (attacker: GameCharacter | undefined) => dispatch({ type: 'SELECT_ATTACKER', payload: { attacker } }),
     selectTarget: (target: GameCharacter) => dispatch({ type: 'SELECT_TARGET', payload: { target } }),
     attack: () => dispatch({ type: 'ATTACK' }),
     endTurn: () => dispatch({ type: 'END_TURN' }),

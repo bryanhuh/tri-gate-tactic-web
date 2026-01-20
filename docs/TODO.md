@@ -8,7 +8,7 @@
 - [x] **Performance:** Optimize `BattleArena` re-renders.
 
 ## Features (Roadmap)
-- [ ] **Deck Builder:** Allow users to search and build their own custom deck before battle.
+- [x] **Deck Builder:** Allow users to search and build their own custom deck before battle.
 - [ ] **Multiplayer:** Implement real-time PvP using WebSockets (Socket.io or Pusher).
 - [ ] **Advanced AI:** Implement Minimax or more strategic AI instead of random choices.
 - [ ] **Persistance:** Save game state to LocalStorage to resume later.

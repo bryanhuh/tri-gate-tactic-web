@@ -20,6 +20,25 @@ query ($search: String, $id: Int) {
 }
 `;
 
+const SEARCH_CHARACTERS_QUERY = `
+query ($search: String, $perPage: Int) {
+  Page(perPage: $perPage) {
+    characters(search: $search, sort: FAVOURITES_DESC) {
+      id
+      name { full }
+      image { large }
+      favourites
+      media(sort: POPULARITY_DESC, perPage: 1) {
+        nodes {
+          meanScore
+          title { english romaji }
+        }
+      }
+    }
+  }
+}
+`;
+
 // For MVP, we'll use a predefined list of popular characters
 const CHARACTER_NAMES = [
   // Dragon Ball
@@ -172,6 +191,50 @@ export const fetchCharacter = async (name: string): Promise<GameCharacter | null
   } catch (error) {
     console.error(`[anilist-service] Failed to fetch character ${name}:`, error);
     return null;
+  }
+};
+
+export const searchCharacters = async (query: string, limit = 10): Promise<GameCharacter[]> => {
+  try {
+    const response = await fetch(ANILIST_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        query: SEARCH_CHARACTERS_QUERY,
+        variables: { search: query, perPage: limit },
+      }),
+    });
+
+    const jsonData = await response.json();
+    const characters = jsonData.data?.Page?.characters || [];
+
+    return characters.map((char: any) => {
+      const stats = generateStats(
+        char.favourites,
+        char.media.nodes[0]?.meanScore
+      );
+
+      return {
+        id: char.id,
+        instanceId: crypto.randomUUID(),
+        name: char.name.full,
+        image: char.image.large,
+        tier: stats.tier,
+        stats: {
+          hp: stats.hp,
+          power: stats.power,
+          defense: stats.defense,
+          speed: stats.speed,
+          skill: stats.skill,
+        },
+      };
+    });
+  } catch (error) {
+    console.error(`[anilist-service] Failed to search characters ${query}:`, error);
+    return [];
   }
 };
 

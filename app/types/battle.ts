@@ -32,7 +32,7 @@ export type BattleAction =
   | { type: 'SWAP_CARDS'; payload: { handCard: GameCharacter; fieldPosition: number } }
   | { type: 'DRAW_WILDCARD'; payload: { wildcards: GameCharacter[] } }
   | { type: 'CLEAR_WILDCARD_ALERT' }
-  | { type: 'SELECT_ATTACKER'; payload: { attacker: GameCharacter } }
+  | { type: 'SELECT_ATTACKER'; payload: { attacker: GameCharacter | undefined } }
   | { type: 'SELECT_TARGET'; payload: { target: GameCharacter } }
   | { type: 'ATTACK' }
   | { type: 'END_TURN' }

@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState } from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
+import Link from 'next/link';
 
 type HeroSectionProps = {
   onPlayNow: () => void;
@@ -62,9 +63,12 @@ export default function HeroSection({ onPlayNow }: HeroSectionProps) {
           >
             PLAY NOW
           </button>
-          <button className="bg-white/10 backdrop-blur-md text-white border border-white/20 px-8 py-4 rounded-full font-black text-xl hover:bg-white/20 transition">
-            COLLECTION
-          </button>
+          <Link 
+            href="/deck-builder"
+            className="bg-white/10 backdrop-blur-md text-white border border-white/20 px-8 py-4 rounded-full font-black text-xl hover:bg-white/20 transition hover:scale-105"
+          >
+            DECK BUILDER
+          </Link>
         </div>
       </div>
 
