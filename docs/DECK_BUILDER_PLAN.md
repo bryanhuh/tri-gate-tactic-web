@@ -59,21 +59,21 @@ Create a "Deck Builder" interface allowing users to search for anime characters 
 ## Implementation Steps
 
 ### Phase 1: Service & Data
-1.  [ ] Update `lib/anilist-service.ts` to add `searchCharacters(query: string)` function.
-2.  [ ] Verify stat generation works for search results.
+1.  [x] Update `lib/anilist-service.ts` to add `searchCharacters(query: string)` function.
+2.  [x] Verify stat generation works for search results.
 
 ### Phase 2: UI Implementation
-3.  [ ] Create `app/deck-builder/page.tsx`.
-4.  [ ] Build `CharacterSearch` component.
-5.  [ ] Build `DeckView` component.
-6.  [ ] Implement Add/Remove logic.
+3.  [x] Create `app/deck-builder/page.tsx`.
+4.  [x] Build `CharacterSearch` component.
+5.  [x] Build `DeckView` component.
+6.  [x] Implement Add/Remove logic.
 
 ### Phase 3: Integration
-7.  [ ] Save deck to `localStorage`.
-8.  [ ] Update Game Initialization to read from `localStorage` (or passed prop) instead of generating a random deck.
-9.  [ ] Add "Build Deck" button to Main Menu (`app/page.tsx`).
+7.  [x] Save deck to `localStorage`.
+8.  [x] Update Game Initialization to read from `localStorage` (or passed prop) instead of generating a random deck.
+9.  [x] Add "Build Deck" button to Main Menu (`app/page.tsx`).
 
 ### Phase 4: Polish
-10. [ ] Add Loading states for search.
-11. [ ] Add Error handling for empty search results.
-12. [ ] Visual polish (animations when adding/removing cards).
+10. [x] Add Loading states for search.
+11. [x] Add Error handling for empty search results.
+12. [x] Visual polish (animations when adding/removing cards).
