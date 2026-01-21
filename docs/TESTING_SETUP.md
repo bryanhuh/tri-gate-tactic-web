@@ -1,6 +1,6 @@
 # Testing Setup & Change Log
 
-This document outlines the steps taken to set up the testing infrastructure for the **Anime Battle Cards** project, along with a summary of the error handling and performance optimizations implemented. Use this as a reference for creating future tests.
+This document outlines the steps taken to set up the testing infrastructure for the **Tri-Gate Tactic** project, along with a summary of the error handling and performance optimizations implemented. Use this as a reference for creating future tests.
 
 ## 1. Summary of Changes
 

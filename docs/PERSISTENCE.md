@@ -6,7 +6,7 @@ The Persistence feature allows users to close the browser tab or refresh the pag
 ## Implementation Details
 
 ### State Management
-- **Key:** `anime-battle-state`
+- **Key:** `tri-gate-tactic-state`
 - **Format:** JSON serialization of the `GameState` object.
 - **Auto-Save:** The game state is saved automatically whenever the state changes during the `reveal` (Opponent Reveal) or `battle` phases.
 - **Cleanup:** The save file is automatically removed when the `game-over` phase is reached (Win or Loss).

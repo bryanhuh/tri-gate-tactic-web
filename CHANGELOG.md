@@ -31,6 +31,7 @@ All notable changes to this project will be documented in this file.
   - Implemented stylized "Cyberpunk" buttons with slanted edges (`clip-path`) and hover glitch effects.
   - Added a retro-futuristic grid overlay and dynamic ambient background.
   - Improved "Play Now", "Resume", and "Deck Builder" call-to-action visibility.
+- **Branding:** Renamed project from "Anime Battle Cards" to "Tri-Gate Tactic" across the application.
 - **Home Page (`app/page.tsx`):** Added logic to detect `anime-battle-ready-to-play` flag and auto-start battles with the saved deck.
 - **Showcase Component:** Updated the main menu to include a link to the Deck Builder.
 - **AniList Service:** Added `searchCharacters` function to support paginated search queries.

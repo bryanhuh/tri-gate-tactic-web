@@ -16,7 +16,7 @@ export default function HeroSection({ onPlayNow, onResume }: HeroSectionProps) {
   const [hasSave, setHasSave] = useState(false);
 
   useEffect(() => {
-    const savedState = localStorage.getItem('anime-battle-state');
+    const savedState = localStorage.getItem('tri-gate-tactic-state');
     if (savedState) setHasSave(true);
   }, []);
 
@@ -67,9 +67,8 @@ export default function HeroSection({ onPlayNow, onResume }: HeroSectionProps) {
            className="relative"
         >
            <h1 className="text-7xl md:text-9xl font-black italic tracking-tighter uppercase mb-4 relative z-10 drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]">
-            <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-400">Anime</span> 
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600 mx-2 md:mx-4">Battle</span>
-            <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-400">Arena</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-400">Tri-Gate</span> 
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600 mx-2 md:mx-4">Tactic</span>
           </h1>
         </motion.div>
 

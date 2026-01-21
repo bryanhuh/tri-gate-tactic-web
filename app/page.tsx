@@ -17,8 +17,8 @@ export default function Home() {
 
   useEffect(() => {
     const initGame = async () => {
-        const readyToPlay = localStorage.getItem('anime-battle-ready-to-play');
-        const savedDeckStr = localStorage.getItem('anime-battle-saved-team');
+        const readyToPlay = localStorage.getItem('tri-gate-tactic-ready-to-play');
+        const savedDeckStr = localStorage.getItem('tri-gate-tactic-saved-team');
 
         if (readyToPlay === 'true' && savedDeckStr) {
             try {
@@ -32,7 +32,7 @@ export default function Home() {
                 actions.setupGame(playerDeck, opponentDeck);
                 
                 // Clear the flag so a refresh doesn't auto-start again unexpectedly
-                localStorage.removeItem('anime-battle-ready-to-play');
+                localStorage.removeItem('tri-gate-tactic-ready-to-play');
             } catch (error) {
                 console.error("Failed to initialize game from deck builder", error);
             } finally {
@@ -50,7 +50,7 @@ export default function Home() {
 
   const handleResume = () => {
       try {
-          const savedStateStr = localStorage.getItem('anime-battle-state');
+          const savedStateStr = localStorage.getItem('tri-gate-tactic-state');
           if (savedStateStr) {
               const savedState = JSON.parse(savedStateStr);
               actions.resumeGame(savedState);

@@ -1,7 +1,7 @@
 # Game Mechanics
 
 ## Overview
-Anime Battle Cards is a turn-based strategy game where players command a team of anime characters to defeat their opponent. The goal is to either reduce the opponent's HP to zero or eliminate all their combatants.
+Tri-Gate Tactic is a turn-based strategy game where players command a team of anime characters to defeat their opponent. The goal is to either reduce the opponent's HP to zero or eliminate all their combatants.
 
 ## Core Stats
 Each character has the following stats derived from their popularity and score on AniList:

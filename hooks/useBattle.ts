@@ -56,12 +56,12 @@ export function useBattle() {
   useEffect(() => {
     // Save state if we are in an active game phase
     if (state.phase !== 'character-selection' && state.phase !== 'game-over' && state.phase !== 'setup') {
-        localStorage.setItem('anime-battle-state', JSON.stringify(state));
+        localStorage.setItem('tri-gate-tactic-state', JSON.stringify(state));
     }
 
     // Clear save if game is over
     if (state.phase === 'game-over') {
-        localStorage.removeItem('anime-battle-state');
+        localStorage.removeItem('tri-gate-tactic-state');
     }
   }, [state]);
 

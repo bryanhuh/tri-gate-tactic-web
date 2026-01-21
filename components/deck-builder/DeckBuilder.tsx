@@ -29,7 +29,7 @@ export default function DeckBuilder() {
 
   // Load deck from localStorage on mount
   useEffect(() => {
-    const savedDeck = localStorage.getItem('anime-battle-saved-team');
+    const savedDeck = localStorage.getItem('tri-gate-tactic-saved-team');
     if (savedDeck) {
       try {
         const parsed = JSON.parse(savedDeck);
@@ -45,7 +45,7 @@ export default function DeckBuilder() {
 
   // Save deck to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem('anime-battle-saved-team', JSON.stringify(deck));
+    localStorage.setItem('tri-gate-tactic-saved-team', JSON.stringify(deck));
   }, [deck]);
 
   // Audio Control
@@ -98,7 +98,7 @@ export default function DeckBuilder() {
         showToast("Recruit 5 champions to begin!", 'error');
         return;
     }
-    localStorage.setItem('anime-battle-ready-to-play', 'true');
+    localStorage.setItem('tri-gate-tactic-ready-to-play', 'true');
     router.push('/');
   };
 

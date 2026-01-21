@@ -1,4 +1,4 @@
-# Anime Battle Cards
+# Tri-Gate Tactic
 
 An immersive, turn-based strategy card game built with Next.js where anime characters battle for supremacy.
 

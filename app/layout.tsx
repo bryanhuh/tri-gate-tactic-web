@@ -9,8 +9,8 @@ const rajdhani = Rajdhani({
 });
 
 export const metadata: Metadata = {
-  title: "Anime Battle Cards",
-  description: "Epic anime card battles",
+  title: "Tri-Gate Tactic",
+  description: "Epic strategic card battles",
 };
 
 export default function RootLayout({
