@@ -55,6 +55,9 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
         },
       };
     }
+    case 'LOAD_GAME': {
+      return action.payload.gameState;
+    }
     case 'START_BATTLE': {
         return {
             ...state,

@@ -5,12 +5,19 @@ import Link from 'next/link';
 
 type HeroSectionProps = {
   onPlayNow: () => void;
+  onResume?: () => void;
 };
 
-export default function HeroSection({ onPlayNow }: HeroSectionProps) {
+export default function HeroSection({ onPlayNow, onResume }: HeroSectionProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isMuted, setIsMuted] = useState(true);
+  const [hasSave, setHasSave] = useState(false);
+
+  useEffect(() => {
+    const savedState = localStorage.getItem('anime-battle-state');
+    if (savedState) setHasSave(true);
+  }, []);
 
   const handlePlayNowClick = () => {
     // If we have a background audio element (for non-video cases), play it
@@ -63,6 +70,15 @@ export default function HeroSection({ onPlayNow }: HeroSectionProps) {
           >
             PLAY NOW
           </button>
+
+          {hasSave && onResume && (
+            <button 
+                onClick={onResume}
+                className="bg-green-500 text-white px-8 py-4 rounded-full font-black text-xl hover:bg-green-600 transition-transform hover:scale-105 shadow-[0_0_20px_rgba(34,197,94,0.5)]"
+            >
+                RESUME BATTLE
+            </button>
+          )}
           <Link 
             href="/deck-builder"
             className="bg-white/10 backdrop-blur-md text-white border border-white/20 px-8 py-4 rounded-full font-black text-xl hover:bg-white/20 transition hover:scale-105"

@@ -15,7 +15,7 @@
     - [ ] **Lobby System:** Create/Join rooms via unique codes.
     - [ ] **Game Sync:** Broadcast actions (play card, attack) to update opponent's UI.
 - [ ] **Advanced AI:** Implement Minimax or more strategic AI instead of random choices.
-- [ ] **Persistance:** Save game state to LocalStorage to resume later.
+- [x] **Persistance:** Save game state to LocalStorage to resume later.
 - [ ] **Mobile Optimization:** Improve UI scaling for mobile devices (currently optimized for desktop/tablet).
 - [ ] **Elemental Types:** Add Rock-Paper-Scissors mechanics (e.g., Fire beats Grass) based on character traits.
 

@@ -37,4 +37,5 @@ export type BattleAction =
   | { type: 'ATTACK' }
   | { type: 'END_TURN' }
   | { type: 'BEGIN_FIGHT' }
-  | { type: 'GAME_OVER' };
+  | { type: 'GAME_OVER' }
+  | { type: 'LOAD_GAME'; payload: { gameState: GameState } };

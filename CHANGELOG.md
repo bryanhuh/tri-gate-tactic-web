@@ -15,6 +15,10 @@ All notable changes to this project will be documented in this file.
   - Background video integration for a more immersive "anime" vibe.
   - Sound effects and background music support in the builder.
   - Responsive grid layout for search results.
+- **Game Persistence:**
+  - Auto-save functionality for active battles using `localStorage`.
+  - "Resume Battle" option on the main menu to restore interrupted games.
+  - Updates to `useBattle` hook to handle state hydration.
 
 ### Changed
 - **Character Selection:** Redesigned the character selection screen to match the "game vibe" of the Deck Builder.

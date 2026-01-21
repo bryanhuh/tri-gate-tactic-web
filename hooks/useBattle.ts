@@ -1,4 +1,5 @@
-import { useReducer, useMemo } from 'react';
+import { useReducer, useMemo, useEffect } from 'react';
+import { GameState } from '@/app/types/battle';
 import { gameReducer, initialState } from './useGame';
 import { GameCharacter } from '@/types/game';
 import { v4 as uuidv4 } from 'uuid';
@@ -48,7 +49,29 @@ export function useBattle() {
     selectTarget: (target: GameCharacter) => dispatch({ type: 'SELECT_TARGET', payload: { target } }),
     attack: () => dispatch({ type: 'ATTACK' }),
     endTurn: () => dispatch({ type: 'END_TURN' }),
+    resumeGame: (savedState: GameState) => dispatch({ type: 'LOAD_GAME', payload: { gameState: savedState } }),
   }), [dispatch]);
+
+  // Persistence Logic
+  useEffect(() => {
+    // Save state if we are in an active game phase
+    if (state.phase !== 'character-selection' && state.phase !== 'game-over' && state.phase !== 'setup') {
+        localStorage.setItem('anime-battle-state', JSON.stringify(state));
+    }
+
+    // Clear save if game is over
+    if (state.phase === 'game-over') {
+        localStorage.removeItem('anime-battle-state');
+    }
+  }, [state]);
+
+  // Also clear save when starting a fresh game explicitly (handled in setupGame but good to be sure)
+  // We can do this by hooking into the setupGame action implicitly by the fact that it changes state.
+  // Actually, better to do it in the action creator wrapper if possible, but effect is reactive.
+  // The 'setup' phase is transient usually or the start of a flow.
+  // If we are in 'setup' (Character Selection finished, about to reveal), we might want to save?
+  // Let's stick to: Save when 'reveal' or 'battle'.
+
 
   return { state, actions };
 }

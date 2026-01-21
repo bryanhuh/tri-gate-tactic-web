@@ -48,6 +48,18 @@ export default function Home() {
     actions.startBattle();
   };
 
+  const handleResume = () => {
+      try {
+          const savedStateStr = localStorage.getItem('anime-battle-state');
+          if (savedStateStr) {
+              const savedState = JSON.parse(savedStateStr);
+              actions.resumeGame(savedState);
+          }
+      } catch (e) {
+          console.error("Failed to resume game", e);
+      }
+  }
+
   const handleTransitionEnd = () => {
     // You can add any logic here for when the transition ends
   };
@@ -82,8 +94,8 @@ export default function Home() {
   }
 
   if (state.phase === "character-selection") {
-    return <Showcase onPlayNow={handlePlayNow} />;
+    return <Showcase onPlayNow={handlePlayNow} onResume={handleResume} />;
   }
 
-  return <Showcase onPlayNow={handlePlayNow} />;
+  return <Showcase onPlayNow={handlePlayNow} onResume={handleResume} />;
 }

@@ -135,4 +135,25 @@ describe('gameReducer', () => {
       expect(newState.phase).toBe('game-over');
       expect(newState.opponent.hp).toBeLessThanOrEqual(0);
   });
+
+  it('should load saved game state on LOAD_GAME', () => {
+      const savedState: GameState = {
+          ...initialState,
+          phase: 'battle',
+          turn: 'opponent',
+          turnCount: 5,
+          player: { ...initialState.player, hp: 500 },
+      };
+
+      const action: BattleAction = { 
+          type: 'LOAD_GAME', 
+          payload: { gameState: savedState } 
+      };
+      
+      const newState = gameReducer(initialState, action);
+
+      expect(newState).toEqual(savedState);
+      expect(newState.turnCount).toBe(5);
+      expect(newState.player.hp).toBe(500);
+  });
 });
