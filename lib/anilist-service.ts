@@ -194,6 +194,19 @@ export const fetchCharacter = async (name: string): Promise<GameCharacter | null
   }
 };
 
+interface AniListCharacter {
+  id: number;
+  name: { full: string };
+  image: { large: string };
+  favourites: number;
+  media: {
+    nodes: Array<{
+      meanScore: number;
+      title: { english: string; romaji: string };
+    }>;
+  };
+}
+
 export const searchCharacters = async (query: string, limit = 10): Promise<GameCharacter[]> => {
   try {
     const response = await fetch(ANILIST_API_URL, {
@@ -211,7 +224,7 @@ export const searchCharacters = async (query: string, limit = 10): Promise<GameC
     const jsonData = await response.json();
     const characters = jsonData.data?.Page?.characters || [];
 
-    return characters.map((char: any) => {
+    return characters.map((char: AniListCharacter) => {
       const stats = generateStats(
         char.favourites,
         char.media.nodes[0]?.meanScore

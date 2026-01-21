@@ -34,6 +34,7 @@ export default function DeckBuilder() {
       try {
         const parsed = JSON.parse(savedDeck);
         if (Array.isArray(parsed)) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
           setDeck(parsed);
         }
       } catch (e) {

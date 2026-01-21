@@ -17,11 +17,16 @@ All notable changes to this project will be documented in this file.
   - Responsive grid layout for search results.
 
 ### Changed
+- **Character Selection:** Redesigned the character selection screen to match the "game vibe" of the Deck Builder.
+    - Added background video and ambient audio.
+    - Implemented glassmorphism UI with neon accents.
+    - Improved animations for card interactions and transitions.
 - **Home Page (`app/page.tsx`):** Added logic to detect `anime-battle-ready-to-play` flag and auto-start battles with the saved deck.
 - **Showcase Component:** Updated the main menu to include a link to the Deck Builder.
 - **AniList Service:** Added `searchCharacters` function to support paginated search queries.
 
 ### Fixed
+- **Linting:** Resolved strict type issues in `anilist-service` and hook dependency warnings in `DeckBuilder`.
 - Resolved type mismatch issues in `useBattle` hook regarding optional attackers.
 
 ## [0.1.0] - 2026-01-20

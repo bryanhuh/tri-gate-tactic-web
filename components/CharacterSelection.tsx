@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { GameCharacter } from '@/types/game';
 import { getRandomCharacter } from '@/lib/anilist-service';
 import { Card } from './Card';
 import { Spinner } from './ui/Loaders';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Toast, ToastType } from './ui/Toast';
+import { Volume2, VolumeX, Info, RefreshCw, Play, Sparkles } from 'lucide-react';
 
 interface CharacterSelectionProps {
   onBattleStart: (playerDeck: GameCharacter[], opponentDeck: GameCharacter[]) => void;
@@ -19,6 +20,8 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
   const [isFetchingDeck, setIsFetchingDeck] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [savedTeam, setSavedTeam] = useState<GameCharacter[] | null>(null);
+  const [isMuted, setIsMuted] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
   
   const [toast, setToast] = useState<{ message: string; type: ToastType; isVisible: boolean }>({
     message: '',
@@ -34,6 +37,25 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
     setToast(prev => ({ ...prev, isVisible: false }));
   };
 
+  // Audio Control
+  useEffect(() => {
+    if (audioRef.current) {
+        audioRef.current.volume = 0.3;
+        if (!isMuted) {
+            // Attempt to play, but browsers might block autoplay until interaction
+            const playPromise = audioRef.current.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(() => {
+                    // Auto-play was prevented.
+                    setIsMuted(true);
+                });
+            }
+        } else {
+             audioRef.current.pause();
+        }
+    }
+  }, [isMuted]);
+
   // Load saved team on mount
   useEffect(() => {
     const saved = localStorage.getItem('anime-battle-saved-team');
@@ -41,7 +63,6 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length === 5) {
-          // eslint-disable-next-line
           setSavedTeam(parsed);
         }
       } catch (e) {
@@ -61,7 +82,7 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
     if (savedTeam) {
       setCharacters(savedTeam);
       setFlipped(Array(5).fill(true));
-      showToast('Previous team loaded!', 'success');
+      showToast('Previous squad deployed!', 'success');
     }
   };
 
@@ -91,10 +112,10 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
             return newFlipped;
         });
         } else {
-            showToast('Failed to fetch character. Please try again.', 'error');
+            showToast('Summon failed. Retry protocol initiated.', 'error');
         }
-    } catch (e) {
-        showToast('Network error occurred.', 'error');
+    } catch {
+        showToast('Network uplink failed.', 'error');
     }
 
     setLoading(prev => {
@@ -128,10 +149,10 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
         if (opponentDeck.length === 5) {
             await onBattleStart(playerDeck, opponentDeck);
         } else {
-            showToast('Could not find enough opponents. Try again!', 'error');
+            showToast('Opponent matching failed. Retry.', 'error');
         }
-    } catch (e) {
-        showToast('Failed to setup battle.', 'error');
+    } catch {
+        showToast('Battle simulation failed to start.', 'error');
     } finally {
         setIsFetchingDeck(false);
     }
@@ -150,13 +171,29 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
   };
 
   const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    show: { y: 0, opacity: 1 }
+    hidden: { y: 20, opacity: 0, scale: 0.9 },
+    show: { y: 0, opacity: 1, scale: 1 }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen relative overflow-hidden">
-      
+    <div className="flex flex-col items-center justify-center min-h-screen relative overflow-hidden bg-black font-sans">
+      <audio ref={audioRef} src="/assets/background.mp3" loop />
+
+      {/* Background Video/Effects */}
+      <div className="absolute inset-0 z-0">
+          <video 
+            autoPlay 
+            loop 
+            muted 
+            playsInline
+            className="w-full h-full object-cover opacity-40"
+          >
+              <source src="/assets/video.mp4" type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-indigo-900/20" />
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-30" />
+      </div>
+
       <Toast 
         message={toast.message} 
         type={toast.type} 
@@ -164,63 +201,83 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
         onClose={closeToast} 
       />
 
-      {/* Info Button */}
-      <div className="absolute top-4 right-4 z-50">
-        <button 
-            onClick={() => setShowInfo(!showInfo)}
-            className="w-10 h-10 rounded-full bg-gray-800 border border-gray-600 text-white font-bold hover:bg-gray-700 flex items-center justify-center transition-transform hover:scale-110"
-        >
-            ?
-        </button>
+      {/* Top Bar */}
+      <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-start z-50">
+          <div className="flex items-center gap-4">
+               {/* Brand or Back button could go here */}
+          </div>
+          <div className="flex gap-4">
+              <button 
+                  onClick={() => setIsMuted(!isMuted)}
+                  className="w-12 h-12 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 backdrop-blur-md flex items-center justify-center transition-all hover:scale-105 group"
+              >
+                  {isMuted ? <VolumeX size={20} className="text-gray-400" /> : <Volume2 size={20} className="text-cyan-400 group-hover:text-cyan-300" />}
+              </button>
+              <button 
+                  onClick={() => setShowInfo(!showInfo)}
+                  className="w-12 h-12 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 backdrop-blur-md flex items-center justify-center transition-all hover:scale-105 group"
+              >
+                  <Info size={20} className="text-purple-400 group-hover:text-purple-300" />
+              </button>
+          </div>
       </div>
 
-      {/* Info Modal/Tooltip */}
+      {/* Info Modal */}
       <AnimatePresence>
         {showInfo && (
             <motion.div 
-                initial={{ opacity: 0, y: -20, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                className="absolute top-16 right-4 w-80 bg-gray-900/95 backdrop-blur-md border border-gray-700 rounded-xl p-6 shadow-2xl z-50 text-sm text-gray-300"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                className="absolute top-24 right-6 w-96 bg-gray-900/90 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl z-50 text-sm text-gray-300"
             >
-                <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-white font-bold text-lg">Game Mechanics</h3>
-                    <button onClick={() => setShowInfo(false)} className="text-gray-500 hover:text-white">✕</button>
+                <div className="flex justify-between items-center mb-6 pb-4 border-b border-white/10">
+                    <h3 className="text-white font-black italic text-xl uppercase tracking-wider">Battle Manual</h3>
+                    <button onClick={() => setShowInfo(false)} className="text-gray-500 hover:text-white transition-colors">✕</button>
                 </div>
                 
-                <div className="space-y-4">
+                <div className="space-y-6">
                     <div>
-                        <h4 className="text-purple-400 font-bold mb-1">Stats Generation</h4>
-                        <p>Stats are based on real-world Anime Popularity & Ratings!</p>
-                        <ul className="list-disc pl-4 mt-1 space-y-1 text-xs">
-                            <li><strong className="text-red-400">Power:</strong> Based on Mean Score</li>
-                            <li><strong className="text-blue-400">Defense:</strong> Based on Favorites count</li>
-                            <li><strong className="text-green-400">Speed/Skill:</strong> Randomized (50-99)</li>
-                        </ul>
+                        <h4 className="text-cyan-400 font-bold mb-2 uppercase text-xs tracking-widest flex items-center gap-2">
+                             <Sparkles size={14} /> Neural Interface
+                        </h4>
+                        <p className="text-gray-400 leading-relaxed">
+                            Initialize your combat squad by selecting 5 data cards. Each selection pulls a random champion from the global database.
+                        </p>
+                    </div>
+
+                    <div>
+                         <h4 className="text-purple-400 font-bold mb-2 uppercase text-xs tracking-widest">
+                            Stat Algorithms
+                        </h4>
+                        <div className="grid grid-cols-2 gap-3">
+                             <div className="bg-white/5 p-2 rounded border border-white/5">
+                                 <div className="text-red-400 font-bold text-xs">POWER</div>
+                                 <div className="text-[10px] text-gray-500">Based on Global Score</div>
+                             </div>
+                             <div className="bg-white/5 p-2 rounded border border-white/5">
+                                 <div className="text-blue-400 font-bold text-xs">DEFENSE</div>
+                                 <div className="text-[10px] text-gray-500">Based on Fan Base</div>
+                             </div>
+                        </div>
                     </div>
                     
                     <div>
-                        <h4 className="text-yellow-400 font-bold mb-1">Tier System</h4>
-                        <p>Tiers are calculated from total stats:</p>
-                        <div className="grid grid-cols-5 gap-1 mt-2 text-center text-xs font-mono">
-                            <span className="text-yellow-500">S++</span>
-                            <span className="text-yellow-400">S+</span>
-                            <span className="text-yellow-300">S</span>
-                            
-                            <span className="text-purple-400">A+</span>
-                            <span className="text-purple-300">A</span>
-                            
-                            <span className="text-blue-400">B+</span>
-                            <span className="text-blue-300">B</span>
-                            
-                            <span className="text-green-400">C+</span>
-                            <span className="text-green-300">C</span>
-                            
-                            <span className="text-gray-400">D+</span>
+                        <h4 className="text-yellow-400 font-bold mb-2 uppercase text-xs tracking-widest">
+                            Class Tiers
+                        </h4>
+                        <div className="flex flex-wrap gap-1">
+                            {['S++', 'S+', 'S', 'A+', 'A', 'B', 'C', 'D'].map((tier) => (
+                                <span key={tier} className={`px-2 py-1 rounded text-[10px] font-mono font-bold border ${
+                                    tier.startsWith('S') ? 'border-yellow-500/50 text-yellow-500 bg-yellow-500/10' :
+                                    tier.startsWith('A') ? 'border-purple-500/50 text-purple-400 bg-purple-500/10' :
+                                    tier.startsWith('B') ? 'border-blue-500/50 text-blue-400 bg-blue-500/10' :
+                                    'border-gray-500/50 text-gray-400 bg-gray-500/10'
+                                }`}>
+                                    {tier}
+                                </span>
+                            ))}
                         </div>
-                        <p className="mt-2 text-xs italic opacity-70">
-                            (S++ is the highest, D- is the lowest)
-                        </p>
                     </div>
                 </div>
             </motion.div>
@@ -228,35 +285,40 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
       </AnimatePresence>
 
       <motion.div 
-        className="text-center z-10"
+        className="text-center z-10 mb-10 relative"
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <h2 className="text-5xl font-extrabold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 drop-shadow-sm">
-          ASSEMBLE YOUR TEAM
+         <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-blue-500/20 blur-[100px] -z-10 rounded-full pointer-events-none" />
+        
+        <h2 className="text-7xl font-black italic tracking-tighter mb-4 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 drop-shadow-[0_0_15px_rgba(34,211,238,0.5)]">
+          INITIALIZE SQUAD
         </h2>
-        <p className="text-lg text-gray-400 mb-8 tracking-wide">Select 5 cards to reveal your champions.</p>
+        <p className="text-lg text-blue-200/60 tracking-[0.2em] font-mono uppercase">
+            Reveal <span className="text-cyan-400 font-bold">5 Champions</span> to engage
+        </p>
         
         <AnimatePresence>
           {savedTeam && characters.every(c => c === null) && (
              <motion.button
-               initial={{ opacity: 0, scale: 0.8 }}
-               animate={{ opacity: 1, scale: 1 }}
-               exit={{ opacity: 0, scale: 0.8 }}
+               initial={{ opacity: 0, scale: 0.8, y: 20 }}
+               animate={{ opacity: 1, scale: 1, y: 0 }}
+               exit={{ opacity: 0, scale: 0.8, y: 20 }}
                whileHover={{ scale: 1.05 }}
                whileTap={{ scale: 0.95 }}
                onClick={handleUseSavedTeam}
-               className="mb-8 px-6 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold rounded-full shadow-lg border border-indigo-400/30 hover:shadow-indigo-500/50 transition-all"
+               className="mt-8 px-8 py-3 bg-white/5 border border-white/10 hover:bg-white/10 hover:border-cyan-500/50 text-cyan-400 font-bold rounded-full backdrop-blur-md flex items-center gap-2 mx-auto transition-all shadow-[0_0_20px_rgba(0,0,0,0.5)] group"
              >
-               ↺ Reuse Previous Team
+               <RefreshCw size={18} className="group-hover:rotate-180 transition-transform duration-500" />
+               <span>RELOAD LAST CONFIG</span>
              </motion.button>
           )}
         </AnimatePresence>
       </motion.div>
 
       <motion.div 
-        className="flex justify-center gap-6 mb-12 flex-wrap z-10"
+        className="flex justify-center gap-6 mb-16 flex-wrap z-10 w-full max-w-[1400px] px-4 perspective-1000"
         variants={containerVariants}
         initial="hidden"
         animate="show"
@@ -264,45 +326,87 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
         {characters.map((character, index) => (
           <motion.div 
             key={index} 
-            className={`flip-card ${!flipped[index] ? 'glow' : ''}`} 
+            className={`flip-card w-48 h-72 cursor-pointer relative group ${!flipped[index] ? 'hover:scale-105 transition-transform duration-300' : ''}`} 
             onClick={() => handleCardClick(index)}
             variants={itemVariants}
-            whileHover={{ scale: 1.05 }}
           >
-            <div className={`flip-card-inner ${flipped[index] ? 'flipped' : ''}`}>
-              <div className="flip-card-front shadow-xl shadow-blue-900/20">
-                <img src="/assets/card.png" alt="Card back" className="w-48 h-64 object-cover rounded-lg" />
+            <div className={`flip-card-inner transition-all duration-700 ${flipped[index] ? 'flipped' : ''}`}>
+              
+              {/* Front (Back of Card) */}
+              <div className="flip-card-front rounded-xl overflow-hidden shadow-2xl relative border border-white/10 bg-gray-900">
+                <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-black" />
+                <div className="absolute inset-0 flex flex-col items-center justify-center opacity-60">
+                    <img src="/assets/card.png" alt="Card Back" className="w-full h-full object-cover opacity-50 grayscale contrast-125" />
+                </div>
+                {/* Holographic overlay */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <div className="w-16 h-16 rounded-full border-2 border-cyan-500/30 flex items-center justify-center bg-black/50 backdrop-blur-sm group-hover:scale-110 transition-transform duration-500 group-hover:border-cyan-400">
+                        <span className="text-2xl font-black text-cyan-500/50 group-hover:text-cyan-400 transition-colors">?</span>
+                    </div>
+                    <p className="mt-4 text-xs font-mono text-cyan-500/50 tracking-widest uppercase group-hover:text-cyan-400">Click to Reveal</p>
+                </div>
               </div>
-              <div className="flip-card-back shadow-xl shadow-purple-900/20">
-                {loading[index] && <Spinner />}
-                {character && <Card character={character} />}
+
+              {/* Back (Character Revealed) */}
+              <div className="flip-card-back rounded-xl overflow-hidden shadow-[0_0_30px_rgba(139,92,246,0.3)] relative bg-gray-900 border border-purple-500/30">
+                {loading[index] ? (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm z-20">
+                        <Spinner />
+                        <span className="mt-4 text-xs font-mono text-purple-400 animate-pulse tracking-widest">DECRYPTING...</span>
+                    </div>
+                ) : null}
+                {character && <Card character={character} className="w-full h-full" />}
               </div>
             </div>
+            
+            {/* Glow effect for unrevealed cards */}
+            {!flipped[index] && (
+                <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl blur opacity-0 group-hover:opacity-30 transition duration-500 -z-10" />
+            )}
           </motion.div>
         ))}
       </motion.div>
       
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
+        transition={{ delay: 0.5, type: 'spring' }}
+        className="z-20 pb-10"
       >
         <button
           onClick={handleStartBattle}
           disabled={!allCharactersSelected || isFetchingDeck}
-          className={`px-10 py-4 font-bold rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 ${
+          className={`group relative px-12 py-5 font-black italic text-xl tracking-wider rounded-lg overflow-hidden transition-all duration-300 ${
             !allCharactersSelected || isFetchingDeck
-              ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
-              : 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-green-500/30 hover:shadow-green-500/50'
+              ? 'bg-gray-800/50 text-gray-500 cursor-not-allowed border border-white/5'
+              : 'bg-transparent text-white shadow-[0_0_40px_rgba(16,185,129,0.3)] hover:shadow-[0_0_60px_rgba(16,185,129,0.5)] border border-green-500/50'
           }`}
         >
-          {isFetchingDeck ? (
-             <div className="flex items-center gap-2">
-               <Spinner /> <span>Preparing Battle...</span>
-             </div>
-          ) : (
-             'START BATTLE'
+          {allCharactersSelected && !isFetchingDeck && (
+              <>
+                <div className="absolute inset-0 bg-gradient-to-r from-green-600 to-emerald-600 opacity-80 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20" />
+                
+                {/* Button shine effect */}
+                <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 skew-x-12" />
+              </>
           )}
+
+          <div className="relative flex items-center gap-3">
+            {isFetchingDeck ? (
+               <>
+                 <Spinner size="sm" /> 
+                 <span className="animate-pulse">SYNCHRONIZING BATTLEFIELD...</span>
+               </>
+            ) : (
+               <>
+                 <span className="group-hover:translate-x-1 transition-transform">INITIATE COMBAT</span>
+                 <Play fill="currentColor" size={20} className="group-hover:translate-x-1 transition-transform" />
+               </>
+            )}
+          </div>
         </button>
       </motion.div>
     </div>

@@ -9,7 +9,11 @@
 
 ## Features (Roadmap)
 - [x] **Deck Builder:** Allow users to search and build their own custom deck before battle.
-- [ ] **Multiplayer:** Implement real-time PvP using WebSockets (Socket.io or Pusher).
+- [ ] **Multiplayer:** Implement real-time PvP.
+    <!-- Reason: Pure frontend multiplayer isn't possible without a signaling server. Using managed services (Pusher/Firebase) avoids building a custom backend. -->
+    - [ ] **Tech Stack:** Use a managed service (Pusher or Firebase) to avoid custom backend infrastructure. (Target Free Tiers)
+    - [ ] **Lobby System:** Create/Join rooms via unique codes.
+    - [ ] **Game Sync:** Broadcast actions (play card, attack) to update opponent's UI.
 - [ ] **Advanced AI:** Implement Minimax or more strategic AI instead of random choices.
 - [ ] **Persistance:** Save game state to LocalStorage to resume later.
 - [ ] **Mobile Optimization:** Improve UI scaling for mobile devices (currently optimized for desktop/tablet).
