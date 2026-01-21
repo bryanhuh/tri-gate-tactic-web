@@ -117,7 +117,7 @@ export default function DeckBuilder() {
             >
                 <source src="/assets/video.mp4" type="video/mp4" />
             </video>
-            <div className="absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-900/80 to-indigo-900/40" />
+            <div className="absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-900/80 to-yellow-900/40" />
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20" />
         </div>
 
@@ -136,33 +136,33 @@ export default function DeckBuilder() {
                     <ChevronLeft size={24} className="text-gray-300 group-hover:text-white" />
                 </Link>
                 <div>
-                    <h1 className="text-4xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-white drop-shadow-lg uppercase">
+                    <h1 className="text-4xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-300 to-white drop-shadow-lg uppercase">
                         Archive
                     </h1>
-                    <p className="text-xs text-blue-300/70 tracking-widest uppercase font-mono">Select your champions</p>
+                    <p className="text-xs text-yellow-300/70 tracking-widest uppercase font-mono">Select your champions</p>
                 </div>
             </div>
              <button 
                 onClick={() => setIsMuted(!isMuted)}
                 className="p-3 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 transition-colors"
             >
-                {isMuted ? <VolumeX size={20} className="text-gray-400" /> : <Volume2 size={20} className="text-blue-400" />}
+                {isMuted ? <VolumeX size={20} className="text-gray-400" /> : <Volume2 size={20} className="text-yellow-400" />}
             </button>
         </div>
         
         <div className="relative mb-8 group">
              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <SearchIcon className="h-5 w-5 text-cyan-500/70 group-focus-within:text-cyan-400 transition-colors" />
+                <SearchIcon className="h-5 w-5 text-yellow-500/70 group-focus-within:text-yellow-400 transition-colors" />
             </div>
              <CharacterSearch onSearch={handleSearch} />
-             <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent scale-x-0 group-focus-within:scale-x-100 transition-transform duration-500" />
+             <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-yellow-500/50 to-transparent scale-x-0 group-focus-within:scale-x-100 transition-transform duration-500" />
         </div>
 
-        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-cyan-900/50 scrollbar-track-transparent pr-2 mask-linear-fade">
+        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-yellow-900/50 scrollbar-track-transparent pr-2 mask-linear-fade">
             {loading ? (
                 <div className="flex flex-col items-center justify-center mt-32 gap-4">
                     <Spinner />
-                    <span className="text-cyan-400 font-mono text-sm animate-pulse">Scanning Database...</span>
+                    <span className="text-yellow-400 font-mono text-sm animate-pulse">Scanning Database...</span>
                 </div>
             ) : results.length > 0 ? (
                 <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 p-2 pb-20">
@@ -179,7 +179,7 @@ export default function DeckBuilder() {
                                 <Card 
                                     character={char} 
                                     onClick={() => addToDeck(char)} 
-                                    className={`cursor-pointer transition-all duration-300 ${isInDeck ? 'grayscale opacity-50' : 'hover:shadow-[0_0_30px_rgba(34,211,238,0.4)] hover:border-cyan-400'}`} 
+                                    className={`cursor-pointer transition-all duration-300 ${isInDeck ? 'grayscale opacity-50' : 'hover:shadow-[0_0_30px_rgba(234,179,8,0.4)] hover:border-yellow-400'}`} 
                                 />
                                 {isInDeck && (
                                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
@@ -205,7 +205,7 @@ export default function DeckBuilder() {
       {/* Right Panel: My Deck */}
       <div className="w-[450px] flex flex-col bg-gray-900/60 backdrop-blur-xl border-l border-white/10 shadow-2xl z-20 relative">
          {/* Holographic Edge Line */}
-         <div className="absolute left-0 top-0 bottom-0 w-[1px] bg-gradient-to-b from-transparent via-cyan-500/30 to-transparent" />
+         <div className="absolute left-0 top-0 bottom-0 w-[1px] bg-gradient-to-b from-transparent via-yellow-500/30 to-transparent" />
 
         <div className="p-6 border-b border-white/5 bg-gradient-to-r from-gray-900/50 to-transparent">
              <div className="flex justify-between items-end mb-2">
@@ -213,7 +213,7 @@ export default function DeckBuilder() {
                     <h2 className="text-2xl font-black italic tracking-tighter text-white uppercase drop-shadow-md">
                         Squad Roster
                     </h2>
-                    <p className="text-xs text-purple-300/70 font-mono uppercase tracking-widest">Manage your team</p>
+                    <p className="text-xs text-orange-300/70 font-mono uppercase tracking-widest">Manage your team</p>
                  </div>
                  <div className="text-right">
                     <span className={`text-4xl font-black leading-none ${deck.length === 5 ? 'text-green-400 drop-shadow-[0_0_10px_rgba(74,222,128,0.5)]' : 'text-gray-600'}`}>
@@ -255,15 +255,15 @@ export default function DeckBuilder() {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -50, scale: 0.8 }}
                         transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                        className="group relative flex items-center gap-4 bg-gray-800/40 border border-white/5 p-3 rounded-xl hover:bg-gray-800/80 hover:border-purple-500/30 transition-all cursor-pointer overflow-hidden"
+                        className="group relative flex items-center gap-4 bg-gray-800/40 border border-white/5 p-3 rounded-xl hover:bg-gray-800/80 hover:border-orange-500/30 transition-all cursor-pointer overflow-hidden"
                     >
                          {/* Card Background Gradient */}
-                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-purple-900/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-yellow-900/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                          
                          {/* Number Badge */}
-                         <div className="absolute left-0 top-0 bottom-0 w-1 bg-gray-700 group-hover:bg-purple-500 transition-colors" />
+                         <div className="absolute left-0 top-0 bottom-0 w-1 bg-gray-700 group-hover:bg-orange-500 transition-colors" />
                          
-                         <div className="relative w-16 h-16 rounded-lg overflow-hidden shrink-0 border-2 border-gray-700 group-hover:border-purple-400 shadow-lg transition-colors">
+                         <div className="relative w-16 h-16 rounded-lg overflow-hidden shrink-0 border-2 border-gray-700 group-hover:border-orange-400 shadow-lg transition-colors">
                             <img src={char.image} alt={char.name} className="w-full h-full object-cover" />
                         </div>
                         

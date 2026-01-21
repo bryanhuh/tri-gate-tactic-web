@@ -190,7 +190,7 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
           >
               <source src="/assets/video.mp4" type="video/mp4" />
           </video>
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-indigo-900/20" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-yellow-900/20" />
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-30" />
       </div>
 
@@ -211,13 +211,13 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
                   onClick={() => setIsMuted(!isMuted)}
                   className="w-12 h-12 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 backdrop-blur-md flex items-center justify-center transition-all hover:scale-105 group"
               >
-                  {isMuted ? <VolumeX size={20} className="text-gray-400" /> : <Volume2 size={20} className="text-cyan-400 group-hover:text-cyan-300" />}
+                  {isMuted ? <VolumeX size={20} className="text-gray-400" /> : <Volume2 size={20} className="text-yellow-400 group-hover:text-yellow-300" />}
               </button>
               <button 
                   onClick={() => setShowInfo(!showInfo)}
                   className="w-12 h-12 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 backdrop-blur-md flex items-center justify-center transition-all hover:scale-105 group"
               >
-                  <Info size={20} className="text-purple-400 group-hover:text-purple-300" />
+                  <Info size={20} className="text-yellow-400 group-hover:text-yellow-300" />
               </button>
           </div>
       </div>
@@ -238,7 +238,7 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
                 
                 <div className="space-y-6">
                     <div>
-                        <h4 className="text-cyan-400 font-bold mb-2 uppercase text-xs tracking-widest flex items-center gap-2">
+                        <h4 className="text-yellow-400 font-bold mb-2 uppercase text-xs tracking-widest flex items-center gap-2">
                              <Sparkles size={14} /> Neural Interface
                         </h4>
                         <p className="text-gray-400 leading-relaxed">
@@ -247,7 +247,7 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
                     </div>
 
                     <div>
-                         <h4 className="text-purple-400 font-bold mb-2 uppercase text-xs tracking-widest">
+                         <h4 className="text-orange-400 font-bold mb-2 uppercase text-xs tracking-widest">
                             Stat Algorithms
                         </h4>
                         <div className="grid grid-cols-2 gap-3">
@@ -270,8 +270,8 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
                             {['S++', 'S+', 'S', 'A+', 'A', 'B', 'C', 'D'].map((tier) => (
                                 <span key={tier} className={`px-2 py-1 rounded text-[10px] font-mono font-bold border ${
                                     tier.startsWith('S') ? 'border-yellow-500/50 text-yellow-500 bg-yellow-500/10' :
-                                    tier.startsWith('A') ? 'border-purple-500/50 text-purple-400 bg-purple-500/10' :
-                                    tier.startsWith('B') ? 'border-blue-500/50 text-blue-400 bg-blue-500/10' :
+                                    tier.startsWith('A') ? 'border-orange-500/50 text-orange-400 bg-orange-500/10' :
+                                    tier.startsWith('B') ? 'border-red-500/50 text-red-400 bg-red-500/10' :
                                     'border-gray-500/50 text-gray-400 bg-gray-500/10'
                                 }`}>
                                     {tier}
@@ -290,13 +290,13 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-         <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-blue-500/20 blur-[100px] -z-10 rounded-full pointer-events-none" />
+         <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-yellow-500/10 blur-[100px] -z-10 rounded-full pointer-events-none" />
         
-        <h2 className="text-7xl font-black italic tracking-tighter mb-4 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 drop-shadow-[0_0_15px_rgba(34,211,238,0.5)]">
+        <h2 className="text-7xl font-black italic tracking-tighter mb-4 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-500 to-red-600 drop-shadow-[0_0_15px_rgba(234,179,8,0.5)]">
           INITIALIZE SQUAD
         </h2>
-        <p className="text-lg text-blue-200/60 tracking-[0.2em] font-mono uppercase">
-            Reveal <span className="text-cyan-400 font-bold">5 Champions</span> to engage
+        <p className="text-lg text-yellow-200/60 tracking-[0.2em] font-mono uppercase">
+            Reveal <span className="text-yellow-400 font-bold">5 Champions</span> to engage
         </p>
         
         <AnimatePresence>
@@ -308,7 +308,7 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
                whileHover={{ scale: 1.05 }}
                whileTap={{ scale: 0.95 }}
                onClick={handleUseSavedTeam}
-               className="mt-8 px-8 py-3 bg-white/5 border border-white/10 hover:bg-white/10 hover:border-cyan-500/50 text-cyan-400 font-bold rounded-full backdrop-blur-md flex items-center gap-2 mx-auto transition-all shadow-[0_0_20px_rgba(0,0,0,0.5)] group"
+               className="mt-8 px-8 py-3 bg-white/5 border border-white/10 hover:bg-white/10 hover:border-yellow-500/50 text-yellow-400 font-bold rounded-full backdrop-blur-md flex items-center gap-2 mx-auto transition-all shadow-[0_0_20px_rgba(0,0,0,0.5)] group"
              >
                <RefreshCw size={18} className="group-hover:rotate-180 transition-transform duration-500" />
                <span>RELOAD LAST CONFIG</span>
@@ -342,19 +342,19 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
                 <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <div className="w-16 h-16 rounded-full border-2 border-cyan-500/30 flex items-center justify-center bg-black/50 backdrop-blur-sm group-hover:scale-110 transition-transform duration-500 group-hover:border-cyan-400">
-                        <span className="text-2xl font-black text-cyan-500/50 group-hover:text-cyan-400 transition-colors">?</span>
+                    <div className="w-16 h-16 rounded-full border-2 border-yellow-500/30 flex items-center justify-center bg-black/50 backdrop-blur-sm group-hover:scale-110 transition-transform duration-500 group-hover:border-yellow-400">
+                        <span className="text-2xl font-black text-yellow-500/50 group-hover:text-yellow-400 transition-colors">?</span>
                     </div>
-                    <p className="mt-4 text-xs font-mono text-cyan-500/50 tracking-widest uppercase group-hover:text-cyan-400">Click to Reveal</p>
+                    <p className="mt-4 text-xs font-mono text-yellow-500/50 tracking-widest uppercase group-hover:text-yellow-400">Click to Reveal</p>
                 </div>
               </div>
 
               {/* Back (Character Revealed) */}
-              <div className="flip-card-back rounded-xl overflow-hidden shadow-[0_0_30px_rgba(139,92,246,0.3)] relative bg-gray-900 border border-purple-500/30">
+              <div className="flip-card-back rounded-xl overflow-hidden shadow-[0_0_30px_rgba(234,179,8,0.3)] relative bg-gray-900 border border-yellow-500/30">
                 {loading[index] ? (
                     <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm z-20">
                         <Spinner />
-                        <span className="mt-4 text-xs font-mono text-purple-400 animate-pulse tracking-widest">DECRYPTING...</span>
+                        <span className="mt-4 text-xs font-mono text-yellow-400 animate-pulse tracking-widest">DECRYPTING...</span>
                     </div>
                 ) : null}
                 {character && <Card character={character} className="w-full h-full" />}
@@ -363,7 +363,7 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
             
             {/* Glow effect for unrevealed cards */}
             {!flipped[index] && (
-                <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl blur opacity-0 group-hover:opacity-30 transition duration-500 -z-10" />
+                <div className="absolute -inset-1 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-xl blur opacity-0 group-hover:opacity-30 transition duration-500 -z-10" />
             )}
           </motion.div>
         ))}
@@ -381,12 +381,12 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
           className={`group relative px-12 py-5 font-black italic text-xl tracking-wider rounded-lg overflow-hidden transition-all duration-300 ${
             !allCharactersSelected || isFetchingDeck
               ? 'bg-gray-800/50 text-gray-500 cursor-not-allowed border border-white/5'
-              : 'bg-transparent text-white shadow-[0_0_40px_rgba(16,185,129,0.3)] hover:shadow-[0_0_60px_rgba(16,185,129,0.5)] border border-green-500/50'
+              : 'bg-transparent text-white shadow-[0_0_40px_rgba(234,179,8,0.3)] hover:shadow-[0_0_60px_rgba(234,179,8,0.5)] border border-yellow-500/50'
           }`}
         >
           {allCharactersSelected && !isFetchingDeck && (
               <>
-                <div className="absolute inset-0 bg-gradient-to-r from-green-600 to-emerald-600 opacity-80 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute inset-0 bg-gradient-to-r from-yellow-600 to-orange-600 opacity-80 group-hover:opacity-100 transition-opacity" />
                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20" />
                 
                 {/* Button shine effect */}
@@ -397,7 +397,7 @@ const CharacterSelection = ({ onBattleStart }: CharacterSelectionProps) => {
           <div className="relative flex items-center gap-3">
             {isFetchingDeck ? (
                <>
-                 <Spinner size="sm" /> 
+                 <Spinner />  
                  <span className="animate-pulse">SYNCHRONIZING BATTLEFIELD...</span>
                </>
             ) : (
