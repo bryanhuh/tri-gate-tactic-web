@@ -25,6 +25,12 @@ All notable changes to this project will be documented in this file.
     - Added background video and ambient audio.
     - Implemented glassmorphism UI with neon accents.
     - Improved animations for card interactions and transitions.
+- **Showcase Component (`app/page.tsx`):**
+  - Completely redesigned for a premium "Game Vibe".
+  - Added entrance animations using `framer-motion`.
+  - Implemented stylized "Cyberpunk" buttons with slanted edges (`clip-path`) and hover glitch effects.
+  - Added a retro-futuristic grid overlay and dynamic ambient background.
+  - Improved "Play Now", "Resume", and "Deck Builder" call-to-action visibility.
 - **Home Page (`app/page.tsx`):** Added logic to detect `anime-battle-ready-to-play` flag and auto-start battles with the saved deck.
 - **Showcase Component:** Updated the main menu to include a link to the Deck Builder.
 - **AniList Service:** Added `searchCharacters` function to support paginated search queries.
