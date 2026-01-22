@@ -1,8 +1,9 @@
 "use client";
 import React, { useEffect, useRef, useState } from 'react';
-import { Volume2, VolumeX, Sword, Play, Save } from 'lucide-react';
+import { Volume2, VolumeX, Sword, Play, Save, User } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { supabase } from '@/lib/supabase';
 
 type HeroSectionProps = {
   onPlayNow: () => void;
@@ -15,9 +16,18 @@ export default function HeroSection({ onPlayNow, onResume }: HeroSectionProps) {
   const [isMuted, setIsMuted] = useState(true);
   const [hasSave, setHasSave] = useState(false);
 
+  const [user, setUser] = useState<any>(null);
+
   useEffect(() => {
     const savedState = localStorage.getItem('tri-gate-tactic-state');
     if (savedState) setHasSave(true);
+
+    // Check auth state
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    checkUser();
   }, []);
 
   const handlePlayNowClick = () => {
@@ -85,7 +95,7 @@ export default function HeroSection({ onPlayNow, onResume }: HeroSectionProps) {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8, duration: 0.8 }}
-          className="mt-12 flex flex-col md:flex-row gap-6 items-center w-full justify-center"
+          className="mt-12 flex flex-col md:flex-row flex-wrap gap-6 items-center w-full justify-center"
         >
           {/* PLAY NOW BUTTON */}
           <button 
@@ -124,6 +134,16 @@ export default function HeroSection({ onPlayNow, onResume }: HeroSectionProps) {
           >
              <Sword size={24} />
              <span>Deck Builder</span>
+          </Link>
+
+          {/* LOGIN / PROFILE LINK */}
+           <Link 
+            href={user ? "/profile" : "/login"}
+            className="group relative px-10 py-5 bg-transparent border-2 border-yellow-500/50 text-yellow-500 font-bold text-xl uppercase tracking-wider hover:bg-yellow-500/10 transition-all active:scale-95 min-w-[200px] flex items-center justify-center gap-3 backdrop-blur-md"
+            style={{ clipPath: 'polygon(10% 0, 100% 0, 100% 80%, 90% 100%, 0 100%, 0 20%)' }}
+          >
+             <User size={24} />
+             <span>{user ? "Profile" : "Login"}</span>
           </Link>
         </motion.div>
       </div>

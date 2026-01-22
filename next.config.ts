@@ -8,7 +8,21 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 's4.anilist.co',
-        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.supabase.co',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.githubusercontent.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.googleusercontent.com',
         pathname: '/**',
       },
     ],
