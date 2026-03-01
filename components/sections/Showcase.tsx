@@ -1,6 +1,6 @@
 "use client";
-import React, { useEffect, useRef, useState } from 'react';
-import { Volume2, VolumeX, Sword, Play, Save, User } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Sword, Play, Save } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
@@ -11,9 +11,6 @@ type HeroSectionProps = {
 };
 
 export default function HeroSection({ onPlayNow, onResume }: HeroSectionProps) {
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [isMuted, setIsMuted] = useState(true);
   const [hasSave, setHasSave] = useState(false);
 
   const [user, setUser] = useState<any>(null);
@@ -31,32 +28,17 @@ export default function HeroSection({ onPlayNow, onResume }: HeroSectionProps) {
   }, []);
 
   const handlePlayNowClick = () => {
-    if (audioRef.current) {
-      audioRef.current.volume = 0.5;
-      audioRef.current.play().catch(error => {
-        console.log("Audio playback initiated by user click, prevented:", error);
-      });
-    }
     onPlayNow();
-  };
-
-  const toggleMute = () => {
-    setIsMuted(!isMuted);
-    if (videoRef.current) {
-      videoRef.current.muted = !isMuted;
-    }
   };
 
   return (
     <section className="relative w-full min-h-screen flex flex-col justify-center overflow-hidden bg-black text-white selection:bg-yellow-400 selection:text-black">
-      {/* Audio & Video Background */}
-      <audio ref={audioRef} src="/assets/background.mp3" loop />
+      {/* Video Background */}
       <div className="absolute inset-0 opacity-40">
         <video 
-          ref={videoRef}
           autoPlay 
           loop 
-          muted={isMuted}
+          muted
           playsInline
           className="w-full h-full object-cover object-center scale-105"
         >
@@ -137,15 +119,6 @@ export default function HeroSection({ onPlayNow, onResume }: HeroSectionProps) {
           </Link>
         </motion.div>
       </div>
-
-      {/* Mute Toggle Control */}
-      <button 
-        onClick={toggleMute}
-        className="absolute bottom-8 right-8 z-30 p-4 bg-black/60 backdrop-blur-md border border-white/10 rounded-full text-white hover:bg-yellow-400 hover:text-black transition-all hover:scale-110 shadow-lg"
-        aria-label={isMuted ? "Unmute Video" : "Mute Video"}
-      >
-        {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
-      </button>
 
       {/* Decorative overlaid elements */}
       <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-black/80 to-transparent pointer-events-none z-0" />
