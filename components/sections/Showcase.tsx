@@ -88,7 +88,7 @@ export default function HeroSection({ onPlayNow, onResume }: HeroSectionProps) {
           transition={{ delay: 0.5, duration: 0.8 }}
           className="text-xl md:text-2xl text-gray-300 max-w-2xl font-medium tracking-wide border-l-4 border-yellow-400 pl-6 py-2 bg-black/30 backdrop-blur-sm"
         >
-          Forge your destiny. Collect heroes. Master the power scaling.
+          Collect characters. Master the power scaling.
         </motion.p>
         
         <motion.div 
@@ -134,16 +134,6 @@ export default function HeroSection({ onPlayNow, onResume }: HeroSectionProps) {
           >
              <Sword size={24} />
              <span>Deck Builder</span>
-          </Link>
-
-          {/* LOGIN / PROFILE LINK */}
-           <Link 
-            href={user ? "/profile" : "/login"}
-            className="group relative px-10 py-5 bg-transparent border-2 border-yellow-500/50 text-yellow-500 font-bold text-xl uppercase tracking-wider hover:bg-yellow-500/10 transition-all active:scale-95 min-w-[200px] flex items-center justify-center gap-3 backdrop-blur-md"
-            style={{ clipPath: 'polygon(10% 0, 100% 0, 100% 80%, 90% 100%, 0 100%, 0 20%)' }}
-          >
-             <User size={24} />
-             <span>{user ? "Profile" : "Login"}</span>
           </Link>
         </motion.div>
       </div>
