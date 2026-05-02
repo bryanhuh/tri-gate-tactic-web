@@ -235,9 +235,9 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
         newOpponent.field = newOpponentField;
         newOpponent.graveyard = newOpponentGraveyard;
 
-        // Mark ALL Player field cards as hasAttacked to enforce 1 attack per turn
+        // Mark only the attacker as hasAttacked (each card can attack once per turn)
         newPlayer.field = newPlayer.field.map(c =>
-          c ? { ...c, hasAttacked: true } : c
+          c && c.instanceId === attacker.instanceId ? { ...c, hasAttacked: true } : c
         );
 
         if (newOpponent.hp <= 0) {
@@ -268,9 +268,9 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
           newPlayer.field = newPlayerField;
           newPlayer.graveyard = newPlayerGraveyard;
 
-          // Mark ALL Opponent field cards as hasAttacked to enforce 1 attack per turn
+          // Mark only the attacker as hasAttacked (each card can attack once per turn)
           newOpponent.field = newOpponent.field.map(c =>
-            c ? { ...c, hasAttacked: true } : c
+            c && c.instanceId === attacker.instanceId ? { ...c, hasAttacked: true } : c
           );
 
           if (newPlayer.hp <= 0) {
