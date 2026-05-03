@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Layers,  Skull } from 'lucide-react';
 import { memo } from 'react';
+import { MAX_PLAYER_HP } from '@/lib/gameConfig';
 
 interface OpponentUIProps {
   opponent: PlayerState;
@@ -40,7 +41,7 @@ export const OpponentUI = memo(function OpponentUI({ opponent }: OpponentUIProps
             <div className="w-full h-3 bg-gray-800 rounded-full overflow-hidden border border-gray-600 relative">
                 <motion.div 
                     initial={{ width: '100%' }}
-                    animate={{ width: `${Math.max(0, (opponent.hp / 1000) * 100)}%` }} // Assuming 1000 max HP
+                    animate={{ width: `${Math.max(0, (opponent.hp / MAX_PLAYER_HP) * 100)}%` }}
                     className="h-full bg-gradient-to-r from-red-700 to-red-500"
                     transition={{ type: "spring", stiffness: 100, damping: 20 }}
                 />

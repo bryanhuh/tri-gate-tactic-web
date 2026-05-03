@@ -5,6 +5,7 @@ import { GameCharacter } from '@/types/game';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, memo } from 'react';
 import { Layers, Skull } from 'lucide-react';
+import { MAX_PLAYER_HP } from '@/lib/gameConfig';
 
 interface PlayerUIProps {
   player: PlayerState;
@@ -60,7 +61,7 @@ export const PlayerUI = memo(function PlayerUI({ player, onCardClick, selectedCa
                 <div className="w-full h-3 bg-gray-800 rounded-full overflow-hidden border border-gray-600 relative">
                     <motion.div 
                         initial={{ width: '100%' }}
-                        animate={{ width: `${Math.max(0, (player.hp / 1000) * 100)}%` }} // Assuming 1000 max HP
+                        animate={{ width: `${Math.max(0, (player.hp / MAX_PLAYER_HP) * 100)}%` }}
                         className="h-full bg-gradient-to-r from-green-700 to-green-500"
                         transition={{ type: "spring", stiffness: 100, damping: 20 }}
                     />

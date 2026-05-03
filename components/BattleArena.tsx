@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { GameCharacter } from '@/types/game';
 import Image from 'next/image';
 import { RotateCcw, Trophy, Skull, Sword, Shield, Sparkles, AlertTriangle } from 'lucide-react';
+import { MAX_PLAYER_HP } from '@/lib/gameConfig';
 
 interface BattleActions {
     playCard: (card: GameCharacter, position: number) => void;
@@ -473,7 +474,7 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
                                     <div>
                                         <div className="text-sm text-gray-400 uppercase font-bold">Damage Dealt</div>
                                         <div className="text-2xl font-mono font-bold text-white">
-                                            {1000 - opponent.hp}
+                                            {MAX_PLAYER_HP - opponent.hp}
                                         </div>
                                     </div>
                                 </div>
@@ -485,7 +486,7 @@ export function BattleArena({ gameState, actions }: BattleArenaProps) {
                                     <div>
                                         <div className="text-sm text-gray-400 uppercase font-bold">Damage Taken</div>
                                         <div className="text-2xl font-mono font-bold text-white">
-                                            {1000 - player.hp}
+                                            {MAX_PLAYER_HP - player.hp}
                                         </div>
                                     </div>
                                 </div>
