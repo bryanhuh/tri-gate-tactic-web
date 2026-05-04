@@ -1,12 +1,13 @@
 import { GameState, BattleAction } from '@/app/types/battle';
 import { GameCharacter } from '@/types/game';
+import { MAX_PLAYER_HP } from '@/lib/gameConfig';
 
 export const initialState: GameState = {
   phase: 'character-selection',
   turn: 'player',
   turnCount: 1,
   player: {
-    hp: 1000,
+    hp: MAX_PLAYER_HP,
     hand: [],
     field: [null, null, null],
     deck: [],
@@ -15,7 +16,7 @@ export const initialState: GameState = {
     wildcardUsed: false,
   },
   opponent: {
-    hp: 1000,
+    hp: MAX_PLAYER_HP,
     hand: [],
     field: [null, null, null],
     deck: [],
@@ -206,7 +207,7 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
 
       const attacker = selectedAttacker;
       const target = selectedTarget;
-      const damage = Math.max(0, attacker.stats.power - target.stats.defense);
+      const damage = Math.max(1, attacker.stats.power - target.stats.defense);
 
       const newPlayer = { ...player };
       const newOpponent = { ...opponent };
