@@ -15,9 +15,9 @@
 
 - [x] **All Cards Exhaust On Single Attack:** In `useGame.ts`, when any card attacks, ALL player field cards get `hasAttacked = true`. Each card should track its own attack state independently so players can attack once per card per turn (up to 3 attacks with a full field).
     - File: `hooks/useGame.ts` → `ATTACK` case (lines ~239-241 and ~272-274)
-- [ ] **Hardcoded 1000 HP Max:** HP bar percentages in `PlayerUI.tsx` and `OpponentUI.tsx` hardcode `1000` as max HP. The game over screen also uses `1000 - opponent.hp`. These should reference a shared constant from a config file.
+- [x] **Hardcoded 1000 HP Max:** HP bar percentages in `PlayerUI.tsx` and `OpponentUI.tsx` hardcode `1000` as max HP. The game over screen also uses `1000 - opponent.hp`. These should reference a shared constant from a config file.
     - Files: `components/ui/PlayerUI.tsx`, `components/ui/OpponentUI.tsx`, `components/BattleArena.tsx`
-- [ ] **Damage Formula Too Simple:** `Damage = max(0, Attacker.Power - Target.Defense)` means any character with Defense ≥ opponent's Power takes 0 damage forever. Needs scaling or minimum damage.
+- [x] **Damage Formula Too Simple:** `Damage = max(0, Attacker.Power - Target.Defense)` means any character with Defense ≥ opponent's Power takes 0 damage forever. Needs scaling or minimum damage.
     - File: `hooks/useGame.ts` → `ATTACK` case (line ~209)
 
 ---
