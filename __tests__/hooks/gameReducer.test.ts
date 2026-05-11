@@ -32,6 +32,14 @@ const strongCharacter: GameCharacter = {
 };
 
 describe('gameReducer', () => {
+  beforeEach(() => {
+    jest.spyOn(Math, 'random').mockReturnValue(1);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('should handle PLAY_CARD for player', () => {
     const startState: GameState = {
       ...initialState,
@@ -114,6 +122,64 @@ describe('gameReducer', () => {
       // Target had 10 HP, took 100 dmg -> Should be dead
       expect(newState.opponent.field[0]).toBeNull();
       expect(newState.opponent.graveyard).toHaveLength(1);
+  });
+
+  it('should deal 1.5x damage on a critical hit based on Skill', () => {
+      jest.spyOn(Math, 'random').mockReturnValue(0.49);
+
+      const attacker = { ...strongCharacter, stats: { ...strongCharacter.stats, skill: 100 } }; // 50% crit chance
+      const target = { ...weakCharacter, stats: { ...weakCharacter.stats, hp: 200 } };
+
+      const startState: GameState = {
+          ...initialState,
+          turn: 'player',
+          selectedAttacker: attacker,
+          selectedTarget: target,
+          player: {
+              ...initialState.player,
+              field: [attacker, null, null],
+          },
+          opponent: {
+              ...initialState.opponent,
+              hp: 1000,
+              field: [target, null, null],
+          },
+      };
+
+      const newState = gameReducer(startState, { type: 'ATTACK' });
+
+      expect(newState.opponent.hp).toBe(850);
+      expect(newState.opponent.field[0]?.stats.hp).toBe(50);
+      expect(newState.battleLog.at(-1)).toContain('Critical hit!');
+  });
+
+  it('should not crit when the Skill roll misses', () => {
+      jest.spyOn(Math, 'random').mockReturnValue(0.5);
+
+      const attacker = { ...strongCharacter, stats: { ...strongCharacter.stats, skill: 100 } }; // 50% crit chance
+      const target = { ...weakCharacter, stats: { ...weakCharacter.stats, hp: 200 } };
+
+      const startState: GameState = {
+          ...initialState,
+          turn: 'player',
+          selectedAttacker: attacker,
+          selectedTarget: target,
+          player: {
+              ...initialState.player,
+              field: [attacker, null, null],
+          },
+          opponent: {
+              ...initialState.opponent,
+              hp: 1000,
+              field: [target, null, null],
+          },
+      };
+
+      const newState = gameReducer(startState, { type: 'ATTACK' });
+
+      expect(newState.opponent.hp).toBe(900);
+      expect(newState.opponent.field[0]?.stats.hp).toBe(100);
+      expect(newState.battleLog.at(-1)).not.toContain('Critical hit!');
   });
 
   it('should detect Game Over when HP reaches 0', () => {

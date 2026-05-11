@@ -1,6 +1,8 @@
 import { GameState, BattleAction } from '@/app/types/battle';
-import { GameCharacter } from '@/types/game';
 import { MAX_PLAYER_HP } from '@/lib/gameConfig';
+
+const CRIT_DAMAGE_MULTIPLIER = 1.5;
+const SKILL_TO_CRIT_CHANCE_RATIO = 200;
 
 export const initialState: GameState = {
   phase: 'character-selection',
@@ -207,7 +209,11 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
 
       const attacker = selectedAttacker;
       const target = selectedTarget;
-      const damage = Math.max(1, attacker.stats.power - target.stats.defense);
+      const baseDamage = Math.max(1, attacker.stats.power - target.stats.defense);
+      const critChance = Math.min(1, Math.max(0, attacker.stats.skill / SKILL_TO_CRIT_CHANCE_RATIO));
+      const isCriticalHit = Math.random() < critChance;
+      const damage = isCriticalHit ? Math.ceil(baseDamage * CRIT_DAMAGE_MULTIPLIER) : baseDamage;
+      const criticalText = isCriticalHit ? ' Critical hit!' : '';
 
       const newPlayer = { ...player };
       const newOpponent = { ...opponent };
@@ -224,7 +230,7 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
         const newOpponentGraveyard = [...newOpponent.graveyard];
 
         newOpponent.hp -= damage;
-        logMessage = `${attacker.name} dealt ${damage} damage to ${target.name}.`;
+        logMessage = `${attacker.name} dealt ${damage} damage to ${target.name}.${criticalText}`;
 
         if (updatedTarget.stats.hp <= 0) {
           newOpponentGraveyard.push(updatedTarget);
@@ -257,7 +263,7 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
           const newPlayerGraveyard = [...newPlayer.graveyard];
 
           newPlayer.hp -= damage;
-          logMessage = `Opponent's ${attacker.name} dealt ${damage} damage to your ${target.name}.`;
+          logMessage = `Opponent's ${attacker.name} dealt ${damage} damage to your ${target.name}.${criticalText}`;
 
           if (updatedTarget.stats.hp <= 0) {
             newPlayerGraveyard.push(updatedTarget);

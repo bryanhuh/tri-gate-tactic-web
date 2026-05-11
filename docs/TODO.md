@@ -24,7 +24,7 @@
 
 ## 🎮 Gameplay — Make Stats Matter
 
-- [ ] **Implement Critical Hits (Skill stat):** `Skill / 200` = crit chance. Crits deal 1.5x damage. Makes the Skill stat functional and adds excitement/randomness.
+- [x] **Implement Critical Hits (Skill stat):** `Skill / 200` = crit chance. Crits deal 1.5x damage. Makes the Skill stat functional and adds excitement/randomness.
     - File: `hooks/useGame.ts` → `ATTACK` case
 - [ ] **Implement Turn Order (Speed stat):** Higher total Speed on field determines who goes first each round, or Speed determines attack order within a turn. Gives Speed actual value.
     - File: `hooks/useGame.ts` → `END_TURN` case
