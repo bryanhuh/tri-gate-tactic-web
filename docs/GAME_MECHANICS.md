@@ -9,8 +9,8 @@ Each character has the following stats derived from their popularity and score o
 - **HP (Health Points):** Determines how much damage a character can take before being sent to the Graveyard.
 - **Power:** The raw damage output of the character.
 - **Defense:** Reduces incoming damage.
-- **Speed:** (Currently unused in damage calculation, reserved for turn order mechanics in future updates).
-- **Skill:** (Currently unused, reserved for critical hit chance in future updates).
+- **Speed:** Determines turn order at the start of each round. The side with the higher total Speed among cards on the field acts first.
+- **Skill:** Determines critical hit chance. Critical hits deal 1.5x damage.
 - **Tier:** A rank (S++ to D-) calculated based on total stats.
 
 ### Damage Formula

@@ -1,8 +1,16 @@
-import { GameState, BattleAction } from '@/app/types/battle';
+import { GameState, BattleAction, Turn } from '@/app/types/battle';
 import { MAX_PLAYER_HP } from '@/lib/gameConfig';
 
 const CRIT_DAMAGE_MULTIPLIER = 1.5;
 const SKILL_TO_CRIT_CHANCE_RATIO = 200;
+
+const getFieldSpeed = (field: GameState['player']['field']) =>
+  field.reduce((total, card) => total + (card?.stats.speed ?? 0), 0);
+
+const getRoundFirstTurn = (playerField: GameState['player']['field'], opponentField: GameState['opponent']['field']): Turn =>
+  getFieldSpeed(playerField) >= getFieldSpeed(opponentField) ? 'player' : 'opponent';
+
+const getOpposingTurn = (turn: Turn): Turn => turn === 'player' ? 'opponent' : 'player';
 
 export const initialState: GameState = {
   phase: 'character-selection',
@@ -68,10 +76,17 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
       }
     }
     case 'BEGIN_FIGHT': {
+      const roundFirstTurn = getRoundFirstTurn(state.player.field, state.opponent.field);
+
       return {
         ...state,
         phase: 'battle',
-        battleLog: ['Battle Started!'],
+        turn: roundFirstTurn,
+        roundFirstTurn,
+        battleLog: [
+          'Battle Started!',
+          `${roundFirstTurn === 'player' ? 'Player' : 'Opponent'} wins the speed check and acts first!`,
+        ],
       };
     }
     case 'PLAY_CARD': {
@@ -324,12 +339,24 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
       const newPlayerField = state.player.field.map(c => c ? { ...c, hasAttacked: false } : null);
       const newOpponentField = state.opponent.field.map(c => c ? { ...c, hasAttacked: false } : null);
 
-      const newTurn = state.turn === 'player' ? 'opponent' : 'player';
-      const newTurnCount = newTurn === 'player' ? state.turnCount + 1 : state.turnCount;
+      const currentRoundFirstTurn = state.roundFirstTurn ?? getRoundFirstTurn(state.player.field, state.opponent.field);
+      const currentRoundSecondTurn = getOpposingTurn(currentRoundFirstTurn);
+      const isStartingNewRound = state.turn === currentRoundSecondTurn;
+      const nextRoundFirstTurn = getRoundFirstTurn(newPlayerField, newOpponentField);
+      const newTurn = isStartingNewRound ? nextRoundFirstTurn : currentRoundSecondTurn;
+      const newTurnCount = isStartingNewRound ? state.turnCount + 1 : state.turnCount;
+      const roundFirstTurn = isStartingNewRound ? nextRoundFirstTurn : currentRoundFirstTurn;
+      const battleLog = isStartingNewRound
+        ? [
+          ...state.battleLog,
+          `Round ${newTurnCount}: ${roundFirstTurn === 'player' ? 'Player' : 'Opponent'} wins the speed check and acts first!`,
+        ]
+        : state.battleLog;
 
       return {
         ...state,
         turn: newTurn,
+        roundFirstTurn,
         turnCount: newTurnCount,
         player: {
           ...state.player,
@@ -339,6 +366,7 @@ export function gameReducer(state: GameState, action: BattleAction): GameState {
           ...state.opponent,
           field: newOpponentField,
         },
+        battleLog,
       };
     }
     default:

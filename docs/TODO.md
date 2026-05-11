@@ -26,7 +26,7 @@
 
 - [x] **Implement Critical Hits (Skill stat):** `Skill / 200` = crit chance. Crits deal 1.5x damage. Makes the Skill stat functional and adds excitement/randomness.
     - File: `hooks/useGame.ts` → `ATTACK` case
-- [ ] **Implement Turn Order (Speed stat):** Higher total Speed on field determines who goes first each round, or Speed determines attack order within a turn. Gives Speed actual value.
+- [x] **Implement Turn Order (Speed stat):** Higher total Speed on field determines who goes first each round, or Speed determines attack order within a turn. Gives Speed actual value.
     - File: `hooks/useGame.ts` → `END_TURN` case
 - [ ] **Elemental Types:** Add Rock-Paper-Scissors mechanics (e.g., Fire > Wind > Earth > Water > Fire) based on character traits. Type advantage = 1.5x damage, disadvantage = 0.75x.
     - Files: `types/game.ts`, `hooks/useGame.ts`, `components/Card.tsx`, `lib/anilist-service.ts`

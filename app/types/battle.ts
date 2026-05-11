@@ -16,6 +16,7 @@ export interface PlayerState {
 export interface GameState {
   phase: GamePhase;
   turn: Turn;
+  roundFirstTurn?: Turn;
   turnCount: number;
   player: PlayerState;
   opponent: PlayerState;

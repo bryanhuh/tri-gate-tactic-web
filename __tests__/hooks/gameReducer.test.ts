@@ -73,9 +73,7 @@ describe('gameReducer', () => {
     const newState = gameReducer(startState, action);
 
     expect(newState.turn).toBe('opponent');
-    expect(newState.turnCount).toBe(1); // turn count increases when it goes back to player usually? 
-    // Checking logic: const newTurnCount = newTurn === 'player' ? state.turnCount + 1 : state.turnCount;
-    // So Player -> Opponent: count same. Opponent -> Player: count + 1.
+    expect(newState.turnCount).toBe(1);
   });
 
   it('should increment turn count when Opponent ends turn', () => {
@@ -90,6 +88,61 @@ describe('gameReducer', () => {
 
       expect(newState.turn).toBe('player');
       expect(newState.turnCount).toBe(2);
+  });
+
+  it('should start battle with the side that has higher total field Speed', () => {
+      const slowPlayerCard = { ...mockCharacter, stats: { ...mockCharacter.stats, speed: 10 } };
+      const fastOpponentCard = { ...strongCharacter, stats: { ...strongCharacter.stats, speed: 50 } };
+
+      const startState: GameState = {
+          ...initialState,
+          player: {
+              ...initialState.player,
+              field: [slowPlayerCard, null, null],
+          },
+          opponent: {
+              ...initialState.opponent,
+              field: [fastOpponentCard, null, null],
+          },
+      };
+
+      const newState = gameReducer(startState, { type: 'BEGIN_FIGHT' });
+
+      expect(newState.phase).toBe('battle');
+      expect(newState.turn).toBe('opponent');
+      expect(newState.roundFirstTurn).toBe('opponent');
+      expect(newState.battleLog.at(-1)).toContain('Opponent wins the speed check');
+  });
+
+  it('should let the faster side act first each new round', () => {
+      const slowPlayerCard = { ...mockCharacter, stats: { ...mockCharacter.stats, speed: 10 } };
+      const fastOpponentCard = { ...strongCharacter, stats: { ...strongCharacter.stats, speed: 50 } };
+
+      const startState: GameState = {
+          ...initialState,
+          phase: 'battle',
+          turn: 'opponent',
+          roundFirstTurn: 'opponent',
+          turnCount: 1,
+          player: {
+              ...initialState.player,
+              field: [slowPlayerCard, null, null],
+          },
+          opponent: {
+              ...initialState.opponent,
+              field: [fastOpponentCard, null, null],
+          },
+      };
+
+      const playerTurnState = gameReducer(startState, { type: 'END_TURN' });
+      const nextRoundState = gameReducer(playerTurnState, { type: 'END_TURN' });
+
+      expect(playerTurnState.turn).toBe('player');
+      expect(playerTurnState.turnCount).toBe(1);
+      expect(nextRoundState.turn).toBe('opponent');
+      expect(nextRoundState.roundFirstTurn).toBe('opponent');
+      expect(nextRoundState.turnCount).toBe(2);
+      expect(nextRoundState.battleLog.at(-1)).toContain('Round 2: Opponent wins the speed check');
   });
 
   it('should calculate damage correctly on ATTACK', () => {
